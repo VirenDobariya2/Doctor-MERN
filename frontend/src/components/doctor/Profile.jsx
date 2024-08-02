@@ -6,6 +6,7 @@ const Profile = () => {
 
   const getUser = async () => {
     const token = localStorage.getItem("token");
+    console.log(token);
 
     const users = await axios.get(
       "http://localhost:3000/api/users/get-user-info-by-id",
