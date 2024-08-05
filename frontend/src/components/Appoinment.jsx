@@ -6,6 +6,7 @@ import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom";
 
 const Appointment = () => {
   const {
@@ -15,12 +16,10 @@ const Appointment = () => {
     setSelectedDoctor,
   } = useContext(AppContext);
 
-  const [phoneError, setPhoneError] = useState("");
+  const navigate=useNavigate()
 
   const [formData, setFormData] = useState({
     name: "",
-    phone: "",
-    email: "",
     date: "",
     symptoms: "",
     doctor: selectedDoctor,
@@ -46,20 +45,6 @@ const Appointment = () => {
     });
   };
 
-
-
-  const handlePhoneChange = (value, country) => {
-    setFormData({
-      ...formData,
-      phone: value,
-    });
-    if (!/^\d{10}$/.test(value.replace(/\D/g, ''))) {
-      setPhoneError('Phone number must be 10 digits.');
-    } else {
-      setPhoneError('');
-    }
-  };
-  
   const handleSelectChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -75,17 +60,15 @@ const Appointment = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       const response = await axios.post(
         "http://localhost:3000/api/appoinment/appoinments",
         formData
-      );   
+      );
       console.log("Appointment created successfully:", response.data);
       setFormData({
         name: "",
-        phone: "",
-        email: "",
         date: "",
         symptoms: "",
         doctor: selectedDoctor,
@@ -96,11 +79,18 @@ const Appointment = () => {
       });
 
       toast.success("Appointment created successfully");
-      setPhoneError('')   
+    
     } catch (error) {
       console.log(error);
       toast.error("Failed to create appointment", error);
     }
+  };
+
+  const handleBook = () => {
+
+    setTimeout(() => {
+      navigate("/home");
+    }, 1000);
   };
 
   return (
@@ -128,34 +118,6 @@ const Appointment = () => {
                   value={formData.name}
                   onChange={handleChange}
                   className="block w-96 rounded-md border border-slate-300 bg-white px-3 py-2 placeholder-slate-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-                  required
-                />
-              </div>
-              <div className="w-full mb-4">
-                <label className="block font-bold mb-2">Phone Number *</label>
-                <PhoneInput
-                  country={'us'}
-                  value={formData.phone}
-                  onChange={handlePhoneChange}
-                  inputProps={{
-                    name: 'phone',
-                    required: true,
-                    autoFocus: true,
-                    
-                  }}
-                  className="block w-96 rounded-md border border-slate-300 bg-white py-2 placeholder-slate-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-                />
-                {phoneError && <p className="text-red-500 text-sm mt-1">{phoneError}</p>}
-              </div>
-              <div className="w-full mb-4">
-                <label className="block font-bold mb-2">Email *</label>
-                <input 
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 placeholder-slate-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
                   required
                 />
               </div>
@@ -261,16 +223,17 @@ const Appointment = () => {
               </div>
               <button
                 type="submit"
+                onClick={handleBook}
                 className="border hover:scale-95 duration-300 relative group cursor-pointer text-gray-800 overflow-hidden h-16 w-64 rounded-md bg-blue-300 p-2 flex justify-center items-center font-extrabold"
               >
                 <div className="absolute right-2 -top-4 group-hover:top-1 group-hover:right-2 z-10 w-32 h-32 rounded-full group-hover:scale-150 duration-500 bg-sky-800"></div>
-                <p className="z-40">Book Appointment</p>
+                <p   className="z-40">Book Appointment</p>
               </button>
             </div>
           </form>
         </div>
       </div>
-      <ToastContainer/>
+      <ToastContainer />
     </div>
   );
 };

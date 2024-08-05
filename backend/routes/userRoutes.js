@@ -19,7 +19,7 @@ router.post("/register", async (req, res) => {
       role,
       firstName,
       lastName,
-      email,
+      email,  
       number,
       gender,
       doctorField,
@@ -96,8 +96,24 @@ router.get("/get-user-info-by-id", authMiddleware, async (req,res ) => {
 
 // Admin Approval for the Doctor 
 
-router.patch("/approve-doctor/:id", authMiddleware, async (req, res) => {
-const {id} = req.params
+router.get("/approve-doctor", authMiddleware, async (req, res) => {
+const id = req.userId
+console.log(id)
+
+try{
+  const appoinment = await User.findById(id)
+  if(!appoinment) {
+    return res.status(200).json({message:"User Appoinment is Not found", success: false})
+
+  }else{
+    res.status(200).json({
+      success: true,
+      data: appoinment,
+    })
+  }
+} catch(error) {
+  res.status(500).json({message:"Appoinment Error", success:false, error})
+}
 })
 
 

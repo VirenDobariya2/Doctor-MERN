@@ -78,12 +78,12 @@ const Navbar = () => {
           
         </div>
         <div>
-        <button className="bg-blue-500 border py-2 px-7 rounded-lg hover:bg-blue-400 mr-5 font-bold transition duration-300" onClick={handleScrollAppoinment}>
-            Book Appoinment
+        <button className="bg-gray-500  py-2 px-7 rounded-lg hover:bg-blue-400 mr-5 font-bold transition duration-300" onClick={handleScrollAppoinment}>
+            <p className="text-white">Book Appoinment</p>
           </button>
           {isLoggedIn ? (
             <button
-              className="bg-gray-600 text-white px-7 py-2 rounded-lg hover:bg-blue-700 transition duration-300"
+              className="bg-gray-600 text-white px-7 py-2  rounded-lg hover:bg-blue-700 transition duration-300"
               onClick={handleLogout}
             >
               LOGOUT

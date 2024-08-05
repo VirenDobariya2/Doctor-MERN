@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
   doctorField: { type: String}, 
   doctorExperience: { type: String },
   password: { type: String, required: true },
-  status: { type: String, default: 'pending' },
+
 });
 
 const User = mongoose.model('User', userSchema);

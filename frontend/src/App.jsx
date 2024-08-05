@@ -11,6 +11,7 @@ import Department from "./components/Department";
 import About from "./components/About";
 import Service from "./components/Service";
 import AdminUser from "./admin/AdminUser";
+import Inbox from "./components/doctor/Inbox";
 
 const App = () => {
   return (
@@ -40,6 +41,7 @@ const App = () => {
             
             <Route element={<ProtectedRoute allowedRoles={["doctor"]} />}>
               <Route path="/deshboard" element={<Deshboard />} />
+              <Route path="/inbox" element={<Inbox/>} />
             </Route>
 
             {/* admin page */}

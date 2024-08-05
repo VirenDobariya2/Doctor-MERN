@@ -22,7 +22,7 @@ const Layout = () => {
       icon: FaRegListAlt,
     },
     { name: "Inbox", path: "inbox", icon: PiMailboxFill },
-    { name: "Profile", path: `profile`, icon: CgProfile },
+    { name: "Profile", path: "profile", icon: CgProfile },
     { name: "Log Out", path: "logout", icon: IoPower },
   ];
 
