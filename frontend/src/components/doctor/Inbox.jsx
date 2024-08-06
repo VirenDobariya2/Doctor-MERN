@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 const Inbox = () => {
   const [approvedAppointments, setApprovedAppointments] = useState(null);
-  const [appointmentData, setAppointmentData] = useState(null);
+  // const [appointmentData, setAppointmentData] = useState(null);
   const [error, setError] = useState(null);
 
   const getApprovedAppointments = async () => {

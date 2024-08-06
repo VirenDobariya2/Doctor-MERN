@@ -10,7 +10,7 @@ const Register = () => {
     firstName: "",
     lastName: "",
     email: "",
-    number: "",
+    number: "", 
     gender: "",
     password: "",
     doctorField: "",

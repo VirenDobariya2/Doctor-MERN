@@ -6,7 +6,9 @@
   dotenv.config();
 
   const userRoutes = require('./routes/userRoutes');
-  const userAppoinmentRoutes = require('./routes/userAppoinmentRoutes')
+  const userAppoinmentRoutes = require('./routes/userAppoinmentRoutes');
+  const userDoctorRoutes = require('./routes/userDoctorRoutes');
+  // const adminRoutes = require('./routes/adminRoutes'); 
 
   const app = express()
   app.use(express.json())
@@ -16,7 +18,9 @@
 
 
   app.use('/api/users', userRoutes);
-  app.use('/api/appoinment', userAppoinmentRoutes)
+  app.use('/api/appoinment', userAppoinmentRoutes);
+  app.use('/api/doctors', userDoctorRoutes); 
+  // app.use('/api/admin', adminRoutes);
 
   app.get("/", (req, res) => {
       res.send("API is running...");

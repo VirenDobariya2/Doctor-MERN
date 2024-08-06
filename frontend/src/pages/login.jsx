@@ -26,9 +26,10 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-   
+
     try {
       const response = await axios.post("http://localhost:3000/api/users/login", formData);
+     
       
       const { data, role } = response.data;
 
@@ -37,13 +38,13 @@ const Login = () => {
       localStorage.setItem("token", data);
       localStorage.setItem("role", role);
       localStorage.setItem("isLoggedIn", "true");
-
+     
       if (role === "doctor") {
         setTimeout(() => {
           navigate("/deshboard");
         }, 1000);
-        
       } else if (role === "patient") {
+        console.log(role)
         setTimeout(() => {
           navigate("/home");
         }, 1000);
@@ -51,6 +52,7 @@ const Login = () => {
         setTimeout(()=>{
           navigate("/admin")
         }, 1000)
+        
       }
     } catch (err) {
       console.error(err); 

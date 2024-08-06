@@ -16,7 +16,7 @@ const Appointment = () => {
     setSelectedDoctor,
   } = useContext(AppContext);
 
-  const navigate=useNavigate()
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -28,6 +28,32 @@ const Appointment = () => {
     time: "",
     message: "",
   });
+
+  const [doctor, setDoctors] = useState([]);
+  const [departments, setDepartments] = useState([]);
+
+  useEffect(() => {
+    const getDoctors = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(
+          "http://localhost:3000/api/doctors/doctor-data/?data=approved",
+          {
+            headers: {
+              authorization: token,
+            },
+          }
+        );
+        setDoctors(response.data);
+        setDepartments(response.data)
+      } catch (error) {
+        toast.error("Failed to fetch doctors");
+      }
+    };
+
+    getDoctors();
+  }, []);
+
 
   useEffect(() => {
     setFormData((prevFormData) => ({
@@ -72,14 +98,13 @@ const Appointment = () => {
         date: "",
         symptoms: "",
         doctor: selectedDoctor,
-        department: selectedDepartment,
+        department: setSelectedDepartment,
         gender: "",
         time: "",
         message: "",
       });
 
       toast.success("Appointment created successfully");
-    
     } catch (error) {
       console.log(error);
       toast.error("Failed to create appointment", error);
@@ -87,7 +112,6 @@ const Appointment = () => {
   };
 
   const handleBook = () => {
-
     setTimeout(() => {
       navigate("/home");
     }, 1000);
@@ -157,9 +181,11 @@ const Appointment = () => {
                   <option value="" disabled>
                     Select Doctor
                   </option>
-                  <option>Dr. Mark. F.</option>
-                  <option>Dr. Stephanie Lersch</option>
-                  <option>Dr. Arthur Reese</option>
+                  {doctor.map((doctor) => (
+                    <option key={doctor.id} value={doctor.firstName}>
+                      {doctor.firstName}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="w-full mb-4">
@@ -175,9 +201,14 @@ const Appointment = () => {
                   <option value="" disabled>
                     Select Department
                   </option>
-                  <option>Cardiology</option>
-                  <option>Neurology</option>
-                  <option>Orthopedics</option>
+                  {departments.map((departments) => (
+                    <option
+                      key={departments.id}
+                      value={departments.doctorField}
+                    >
+                      {departments.doctorField}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="w-full mb-4">
@@ -227,7 +258,7 @@ const Appointment = () => {
                 className="border hover:scale-95 duration-300 relative group cursor-pointer text-gray-800 overflow-hidden h-16 w-64 rounded-md bg-blue-300 p-2 flex justify-center items-center font-extrabold"
               >
                 <div className="absolute right-2 -top-4 group-hover:top-1 group-hover:right-2 z-10 w-32 h-32 rounded-full group-hover:scale-150 duration-500 bg-sky-800"></div>
-                <p   className="z-40">Book Appointment</p>
+                <p className="z-40">Book Appointment</p>
               </button>
             </div>
           </form>

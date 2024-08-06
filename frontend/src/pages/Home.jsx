@@ -13,12 +13,10 @@ const Home = () => {
 
   const getData = async()=>{
     try {
-      const response = await axios.post("/api/user/get-info-by-id",{},
-        {
-          headers:{
-            Authorization : "Bearer" + localStorage.get('token')
-          }
-        }
+      const token = localStorage.getItem("token");
+
+      const response = await axios.post("http://localhost:3000/api/user/get-info-by-id",{},
+        { headers: { authorization: token } }
       )
       console.log(response.data)
     } catch (error) {
@@ -26,7 +24,7 @@ const Home = () => {
     }
   }
   useEffect(()=>{
-    getData()
+    // getData()
   })
   return (
     <>

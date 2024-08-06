@@ -6,7 +6,6 @@ const router = express.Router();
 router.post("/appoinments", async (req, res) => {
   const { name, date, symptoms, doctor, department, gender, time, message } =
     req.body;
-
   try {
     const newAppointment = new Appoinment({
       name,
@@ -42,7 +41,6 @@ router.get("/appoinment-data", authMiddleware, async (req, res) => {
 // Approve Button Click and Show
 router.patch("/approve", authMiddleware, async (req, res) => {
   try {
-    // Approve the appointment
     const approvedAppointment = await Appoinment.findByIdAndUpdate(
       req.body.appid,
       { status: "approved" },
@@ -54,7 +52,9 @@ router.patch("/approve", authMiddleware, async (req, res) => {
     res.status(500).send(error);
   }
 });
-// apporove
+
+
+// Apporove
 router.get("/approve", authMiddleware, async (req, res) => {
   try {
     const approvedAppointment = await Appoinment.find({ status: "approved" });

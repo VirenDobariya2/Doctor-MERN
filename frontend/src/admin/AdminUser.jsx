@@ -4,13 +4,14 @@ import { FaUserDoctor } from "react-icons/fa6";
 import { IoPower } from "react-icons/io5";
 import Home from "./AdminHome";
 import AdminLogOut from "./AdminLogOut";
+import DoctorData from "./DoctorData";
 
 const AdminUser = () => {
   const [adminView, setAdminView] = useState("home");
 
   const AdminMenu = [
     { name: "Home", path: "adminhome", icon: AiTwotoneHome },
-    { name: "Doctor", path: "Doctor", icon: FaUserDoctor },
+    { name: "Doctor", path: "doctor", icon: FaUserDoctor },
     { name: "Log Out", path: "logout", icon: IoPower },
   ];
 
@@ -18,6 +19,8 @@ const AdminUser = () => {
     switch (adminView) {
       case "home":
         return <Home />;
+        case "doctor":
+          return <DoctorData/>
         case "logout":
           return <AdminLogOut/>;
       default:

@@ -7,32 +7,33 @@ const Department = () => {
 
   const [departments, setDepartments] = useState([]);
 
-  // useEffect(() => {
-  //   const fetchDepartments = async () => {
-  //     try {
-  //       const response = await axios.get('/api/register', {
-  //         headers: {
-  //           Authorization: `Bearer ${localStorage.getItem('token')}`,
-  //         },
-  //       });
-  //       setDepartments(response.data);
-  //     } catch (error) {
-  //       console.error(error);
-  //     }
-  //   };
+  useEffect(() => {
+    getDoctor()
+  }, []);
 
-  //   fetchDepartments();
-  // }, []);
-
-
-
-
+  const getDoctor = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const doctors = await axios.get(
+        `http://localhost:3000/api/doctors/doctor-data/?data=approved`,
+        {
+          headers: {
+            authorization: token,
+          },
+        }
+      );
+      // console.log("doctor", doctors)
+      setDepartments(doctors.data);
+    } catch (error) {
+      toast.error("Failed to doctors");
+    }
+  };
   return (
     <div className="p-4" id='userDepartment'>
       <h2 className="text-4xl text-center font-bold mb-8 mt-10 uppercase">Doctors</h2>
       <div className="flex flex-wrap justify-center gap-10">
         {departments.filter(department => department.status === 'approved').map(department => (
-          <DepartmentCard key={department.id} department={department} />
+          <DepartmentCard key={department._id} department={department} />
         ))}
       </div>
     </div>

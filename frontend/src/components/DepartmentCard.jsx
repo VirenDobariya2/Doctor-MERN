@@ -7,8 +7,8 @@ const DepartmentCard = ({ department }) => {
   const navigate = useNavigate();
 
   const handleSelected = () => {
-    setSelectedDepartment(department.departmenting);
-    setSelectedDoctor(department.name);
+    setSelectedDepartment(department.doctorField);
+    setSelectedDoctor(department.firstName);
     navigate("/appoinment");
   };
 
@@ -16,25 +16,21 @@ const DepartmentCard = ({ department }) => {
     <div className="w-80 max-w-xs md:max-w-sm lg:max-w-md bg-white shadow-lg rounded-lg overflow-hidden m-7">
       <img
         src={department.image}
-        alt={department.name}
+        alt={department.firstName}
         className="w-full h-36 object-cover md:h-48 lg:h-64"
       />
       <div className="p-4 text-center">
         <h3 className="text-lg md:text-xl lg:text-2xl font-semibold mb-2">
-          {department.name}
+          {department.firstName}
         </h3>
         <h2 className="text-lg font-semibold mb-2">
-          {department.departmenting}
+          {department.doctorField}
         </h2>
-        <p className="text-gray-700 mb-4 text-sm md:text-base lg:text-lg text-left ml-5">
-          {department.description}
-        </p>
+       
         <p className="text-gray-700 mb-4 text-sm lg:text-lg text-left ml-5 ">
-          Experience : {department.experience}
+          Experience : {department.doctorExperience}
         </p>
-        <p className="text-gray-700 mb-4 text-sm lg:text-lg text-left ml-5 ">
-          Age : {department.age}
-        </p>
+       
 
         <button
           type="button"
