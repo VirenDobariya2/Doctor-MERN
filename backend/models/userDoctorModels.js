@@ -11,7 +11,12 @@ const DoctorSchema = new mongoose.Schema({
   doctorExperience: { type: String },
   password: { type: String, required: true },
   status: { type: String, default: "pending" },
+  profilePic: { type: String },
 });
+
+
+  
+
 
 const Doctor = mongoose.model("Doctor", DoctorSchema);
 

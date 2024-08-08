@@ -5,13 +5,15 @@ const Appointments = () => {
   const [appointmentData, setAppointmentData] = useState(null);
 
   const getUser = async () => {
+   
+
     try {
       const token = localStorage.getItem("token");
       const appointments = await axios.get(
         "http://localhost:3000/api/appoinment/appoinment-data",
         { headers: { authorization: token } }
       );
-      console.log(appointments);
+
       setAppointmentData(appointments.data);
     } catch (err) {
       setError(err.message);
@@ -32,8 +34,9 @@ const Appointments = () => {
           appoinment._id === id ? updatedAppointment.data : appoinment
         )
       );
+
       getUser();
-      // navigate("inbox",{ state: { updated: true } });
+      // toast.success("Appointment approved successfully!");
     } catch (err) {
       setError(err.message);
     }
@@ -57,13 +60,13 @@ const Appointments = () => {
   };
 
   useEffect(() => {
-    if (!appointmentData) getUser();
-  }, [appointmentData]);
+    getUser();
+  }, []);
 
   return (
     <div className="p-4">
       <h1 className="text-center text-2xl font-bold mb-4">Appointments</h1>
-      <div className="flex flex-wrap justify-center items-center  ">
+      <div className="flex flex-wrap justify-center items-center">
         {appointmentData &&
           appointmentData.map((appointment) => (
             <div
@@ -84,7 +87,7 @@ const Appointments = () => {
               </div>
               <div className="px-3 py-3">
                 <span className="m-5 font-bold">Doctor:</span>
-                <span className="font-bold m-12">{appointment.doctor}</span>
+                <span className="font-bold m-12">{appointment.doctor.name}</span>
               </div>
               <div className="px-3 py-3">
                 <span className="m-5 font-bold">Department:</span>

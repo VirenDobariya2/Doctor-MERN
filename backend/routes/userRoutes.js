@@ -59,7 +59,6 @@ router.post("/register", async (req, res) => {
   }
 });
 
-
 // Login Data In User
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
@@ -97,9 +96,7 @@ router.post("/login", async (req, res) => {
         ? "admin"
         : "doctor";
 
-    const token = jwt.sign({ id: account._id, role }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    });
+    const token = jwt.sign({ id: account._id, role }, process.env.JWT_SECRET);
 
     return res
       .status(200)
@@ -116,9 +113,9 @@ router.get("/get-user-info-by-id", authMiddleware, async (req, res) => {
   const docid = req.userId;
 
   try {
-    console.log("docid",docid)
+    
     const doctor = await Doctor.findById(docid).select("-password");
-    console.log("doctor",doctor)
+    // console.log("doctor", doctor);
 
     if (!doctor) {
       return res
@@ -141,7 +138,7 @@ router.get("/get-user-info-by-id", authMiddleware, async (req, res) => {
 
 router.get("/approve-doctor", authMiddleware, async (req, res) => {
   const id = req.userId;
-  console.log(id);
+  // console.log(id)
 
   try {
     const appoinment = await User.findById(id);

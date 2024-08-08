@@ -182,7 +182,7 @@ const Appointment = () => {
                     Select Doctor
                   </option>
                   {doctor.map((doctor) => (
-                    <option key={doctor.id} value={doctor.firstName}>
+                    <option key={doctor._id} value={doctor._id}>
                       {doctor.firstName}
                     </option>
                   ))}
@@ -203,7 +203,7 @@ const Appointment = () => {
                   </option>
                   {departments.map((departments) => (
                     <option
-                      key={departments.id}
+                      key={departments._id}
                       value={departments.doctorField}
                     >
                       {departments.doctorField}

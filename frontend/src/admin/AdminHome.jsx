@@ -6,18 +6,19 @@ import "react-toastify/dist/ReactToastify.css";
 const AdminHome = () => {
   const [doctorsData, setDoctorsData] = useState([]);
 
-  const token = localStorage.getItem("token");
+ 
   const getDoctor = async () => {
+    const token = localStorage.getItem("token");
+   
     try {
       const doctors = await axios.get(
-        `http://localhost:3000/api/doctors/doctor-data/?data=approved`,
+        `http://localhost:3000/api/doctors/doctor-data/?data=pending`,
         {
           headers: {
             authorization: token,
           },
         }
-      );
-      // console.log("doctor", doctors)
+      ); 
       setDoctorsData(doctors.data);
     } catch (error) {
       toast.error("Failed to doctors");
@@ -26,14 +27,16 @@ const AdminHome = () => {
 
   const handleapproveDoctor = async (id) => {
     try {
+      const token = localStorage.getItem("token");
       await axios.patch(
         "http://localhost:3000/api/doctors/approve-doctor",
-        { docid: id },
+        { docid: id },        
         {
           headers: {
             authorization: token,
-          },
-        }
+          }, 
+        },
+       
       );
       toast.success("Doctor approved successfully");
       getDoctor();

@@ -1,19 +1,80 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { FaUpload, FaRegEdit, FaSave } from "react-icons/fa";
 
 const Profile = () => {
   const [doctordata, setDoctorData] = useState(null);
+  const [profilePic, setProfilePic] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isFirstUpload, setIsFirstUpload] = useState(true);
+  const [isDataEditMode, setIsDataEditMode] = useState(false);
+  const [editData, setEditData] = useState({});
 
   const getUser = async () => {
     const token = localStorage.getItem("token");
-    
-    const doctors = await axios.get(
-      "http://localhost:3000/api/users/get-user-info-by-id",
-      { headers: { authorization: token } }
-    );
-    console.log("doctors",doctors)
-   
-    setDoctorData(doctors.data.data);
+    try {
+      const response = await axios.get(
+        "http://localhost:3000/api/users/get-user-info-by-id",
+        { headers: { authorization: token } }
+      );
+      const userData = response.data.data;
+      setDoctorData(userData);
+      // if (userData.profilePic) setPreview(userData.profilePic);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setProfilePic(file);
+    setPreview(URL.createObjectURL(file));
+  };
+
+  const uploadProfilePic = async () => {
+    if (!profilePic) return;
+    const token = localStorage.getItem("token");
+    const formData = new FormData();
+    formData.append("profilePic", profilePic);
+
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/doctors/upload-profile-pic",
+        formData,
+        { headers: { authorization: token } }
+      );
+      const userData = response.data.data;
+      setDoctorData(userData);
+      setPreview(null)
+
+      setProfilePic(null);
+      setIsFirstUpload(false);
+    } catch (error) {
+      console.error("Error uploading profile picture:", error);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditData({ ...editData, [name]: value });
+  };
+
+  const saveProfileData = async () => {
+    if (profilePic) await uploadProfilePic();
+    const token = localStorage.getItem("token");
+
+    try {
+      const response = await axios.put(
+        "http://localhost:3000/api/doctors/update-user-info",
+        editData,
+        { headers: { authorization: token } }
+      );
+      setDoctorData(response.data.data);
+      setIsDataEditMode(false);
+    } catch (error) {
+      console.error("Error saving profile data:", error);
+    }
   };
 
   useEffect(() => {
@@ -25,37 +86,108 @@ const Profile = () => {
       <h1 className="text-center text-2xl font-bold mb-4">Profile</h1>
       {doctordata && (
         <div className="space-y-2">
-          <div className="bg-gray-100 p-2 rounded-md shadow-sm flex justify-between items-center">
-            <span className="font-bold text-lg">Role:</span>
-            <span className="font-semibold">{doctordata.role}</span>
+          <div className="flex justify-center mb-4">
+            <div className="mt-4 relative">
+              {/* Photo upload ..................................................... */}
+              {doctordata.profilePic || preview ? ( 
+                <div
+                  className="relative group"
+                  onMouseEnter={() => setIsEditMode(true)}
+                  onMouseLeave={() => setIsEditMode(false)}
+                >
+                  {console.log('preview',preview)}
+                 {preview ?( <img
+                    src={preview}
+                    alt="Profile"
+                    className="w-32 h-32 rounded-full object-cover"
+                  />):
+                  (<img
+                  src={`http://localhost:3000${doctordata.profilePic}`}
+                  alt="Profile"
+                  className="w-32 h-32 rounded-full object-cover"
+                />)
+                }
+                 
+                  {isEditMode && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
+                      <FaRegEdit className="text-white text-2xl" />
+                      <label className="absolute inset-0 flex items-center justify-center cursor-pointer">
+                        <span className="text-white mt-11 mr-1 ">Edit</span>
+                        <input
+                          type="file"
+                          onChange={handleFileChange}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                isFirstUpload && (
+                  <div>
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                      <FaUpload className="text-blue-500" />
+                      <span className="text-blue-500">Upload Profile Picture</span>
+                      <input
+                        type="file"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                )
+              )}
+            </div>
           </div>
-          <div className="bg-gray-100 p-2 rounded-md shadow-sm flex justify-between items-center">
-            <span className="font-bold text-lg">First Name:</span>
-            <span className="font-semibold">{doctordata.firstName}</span>
-          </div>
-          <div className="bg-gray-100 p-2 rounded-md shadow-sm flex justify-between items-center">
-            <span className="font-bold text-lg">Last Name:</span>
-            <span className="font-semibold">{doctordata.lastName}</span>
-          </div>
-          <div className="bg-gray-100 p-2 rounded-md shadow-sm flex justify-between items-center">
-            <span className="font-bold text-lg">Email:</span>
-            <span className="font-semibold">{doctordata.email}</span>
-          </div>
-          <div className="bg-gray-100 p-2 rounded-md shadow-sm flex justify-between items-center">
-            <span className="font-bold text-lg">Gender:</span>
-            <span className="font-semibold">{doctordata.gender}</span>
-          </div>
-          <div className="bg-gray-100 p-2 rounded-md shadow-sm flex justify-between items-center">
-            <span className="font-bold text-lg">Number:</span>
-            <span className="font-semibold">{doctordata.number}</span>
-          </div>
-          <div className="bg-gray-100 p-2 rounded-md shadow-sm flex justify-between items-center">
-            <span className="font-bold text-lg">Field:</span>
-            <span className="font-semibold">{doctordata.doctorField}</span>
-          </div>
-          <div className="bg-gray-100 p-2 rounded-md shadow-sm flex justify-between items-center">
-            <span className="font-bold text-lg">Experience:</span>
-            <span className="font-semibold">{doctordata.doctorExperience}</span>
+
+          <div className="space-y-2">
+
+              {/* Edit The Data Option................................................... */}
+            {isDataEditMode ? (
+              <>
+                {["firstName", "lastName", "doctorField", "doctorExperience"].map((field) => (
+                  <div key={field} className="bg-gray-100 p-2 rounded-md shadow-sm flex justify-between items-center">
+                    <span className="font-bold text-lg capitalize">{field.replace(/([A-Z])/g, ' $1')}:</span>
+                    <input
+                      type="text"
+                      name={field}
+                      value={editData[field] || ""}
+                      onChange={handleInputChange}
+                      className="font-semibold border-b-2 border-gray-300"
+                    />
+                  </div>
+                ))}
+                <button onClick={saveProfileData} className="bg-blue-500 text-white py-2 px-4 rounded-md">
+                  <FaSave className="inline-block mr-2" />
+                  Save
+                </button>
+              </>
+            ) : (
+              // All Data Show the Profile ...........................................................
+              <>
+                {["role", "firstName", "lastName", "email", "gender", "number", "doctorField", "doctorExperience"].map((field) => (
+                  <div key={field} className="bg-gray-100 p-2 rounded-md shadow-sm flex justify-between items-center">
+                    <span className="font-bold text-lg capitalize">{field.replace(/([A-Z])/g, ' $1')}:</span>
+                    <span className="font-semibold">{doctordata[field]}</span>
+                  </div>
+                ))}
+                <button
+                  onClick={() => {
+                    setIsDataEditMode(true);
+                    setEditData({
+                      firstName: doctordata.firstName,
+                      lastName: doctordata.lastName,
+                      doctorField: doctordata.doctorField,
+                      doctorExperience: doctordata.doctorExperience,
+                    });
+                  }}
+                  className="bg-blue-500 text-white py-3 px-5 rounded-md"
+                >
+                  <FaRegEdit className="inline-block mr-2" />
+                  Edit Profile
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}

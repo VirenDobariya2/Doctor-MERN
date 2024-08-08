@@ -28,24 +28,40 @@ router.post("/appoinments", async (req, res) => {
 // Doctor appoinment Page in the data
 
 router.get("/appoinment-data", authMiddleware, async (req, res) => {
-  const userId = req.userId;
+  const doctorId = req.userId; 
+  console.log("docrot", doctorId)
 
   try {
-    const appoinments = await Appoinment.find({status: "pending"});
-    res.status(200).json(appoinments);
+    if (!doctorId) {
+      return res.status(400).json({ message: "Doctor ID is required" });
+    }
+
+    const appointments = await Appoinment.findOne({
+      // doctor: doctorId,
+     
+    })
+    console.log("Appointments found:", appointments);
+
+    res.status(200).json(appointments);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch appointments", error });
   }
 });
 
+
 // Approve Button Click and Show
 router.patch("/approve", authMiddleware, async (req, res) => {
+  const { appid } = req.body;
   try {
     const approvedAppointment = await Appoinment.findByIdAndUpdate(
-      req.body.appid,
+      appid,
       { status: "approved" },
       { new: true }
     );
+
+    if (!approvedAppointment) {
+      return res.status(404).send("Appointment not found");
+    }
 
     res.json(approvedAppointment);
   } catch (error) {
@@ -60,13 +76,13 @@ router.get("/approve", authMiddleware, async (req, res) => {
     const approvedAppointment = await Appoinment.find({ status: "approved" });
     res.json(approvedAppointment);
   } catch (error) {
-    res.status(500).send(err);
+    res.status(500).send("Failed to fetch approved appointments");
   }
 });
 
 // Delete appointment
 router.delete("/appoinment", async (req, res) => {
-  console.log("Deleting appointment with ID", req.query.appid);
+  // console.log("Deleting appointment with ID", req.query.appid);
   try {
     await Appoinment.findByIdAndDelete(req.query.appid);
     res.status(204).send();
