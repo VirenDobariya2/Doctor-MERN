@@ -4,11 +4,13 @@ import { FaRegListAlt } from "react-icons/fa";
 import { CgProfile } from "react-icons/cg";
 import { PiMailboxFill } from "react-icons/pi";
 import { IoPower } from "react-icons/io5";
+import { FaCheckToSlot } from "react-icons/fa6";
 import Home from "./Home";
 import Inbox from "./Inbox";
 import Appointments from "./Appointments";
 import Profile from "./Profile";
 import LogOut from "./LogOut";
+import DoctorSlot from "./DoctorSlot";
 
 const Layout = () => {
   // const [user, setUser] = useState({ _id: "12345" });
@@ -16,6 +18,7 @@ const Layout = () => {
 
   const DoctorMenu = [
     { name: "Home", path: "home", icon: AiTwotoneHome },
+    { name: "DoctorSlot", path: "doctorslot", icon: FaCheckToSlot  },
     {
       name: "Appointments",
       path: "appointments",
@@ -30,6 +33,8 @@ const Layout = () => {
     switch (currentView) {
       case "home":
         return <Home />;
+        case "doctorslot":
+          return <DoctorSlot/>;
       case "inbox":
         return <Inbox />;
       case "appointments":

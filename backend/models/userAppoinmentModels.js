@@ -4,7 +4,8 @@ const appointmentSchema = new mongoose.Schema({
   name: { type: String, required: true },
   date: { type: Date, required: true },
   symptoms: { type: String },
-  doctor: { type: mongoose.Schema.Types.ObjectId,ref: 'Doctor' },
+  doctor: { type: mongoose.Schema.Types.ObjectId, ref: 'Doctor',  required: true },
+
   department: { type: String, required: true },
   gender: { type: String, required: true },
   time: { type: String, required: true },
@@ -12,6 +13,6 @@ const appointmentSchema = new mongoose.Schema({
   status: { type: String, default: 'pending' }
 });
 
-const User = mongoose.model("Appoinment", appointmentSchema);
+const Appoinment = mongoose.model("Appoinment", appointmentSchema);
 
-module.exports = User;
+module.exports = Appoinment;

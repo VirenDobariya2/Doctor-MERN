@@ -3,22 +3,26 @@ import { useEffect, useState } from "react";
 
 const Appointments = () => {
   const [appointmentData, setAppointmentData] = useState(null);
+  // const [error, setError] = useState(null);
+
 
   const getUser = async () => {
-   
-
     try {
       const token = localStorage.getItem("token");
-      const appointments = await axios.get(
-        "http://localhost:3000/api/appoinment/appoinment-data",
+      const response = await axios.get(
+        "http://localhost:3000/api/appoinment/appoinment-data/?data=pending",
         { headers: { authorization: token } }
       );
-
-      setAppointmentData(appointments.data);
+      // console.log("Response from server:", response.data);  
+      setAppointmentData(response.data);
+      // console.log("data", response.data)
     } catch (err) {
       setError(err.message);
     }
   };
+  
+
+//  
 
   const handleApprove = async (id) => {
     try {
@@ -67,7 +71,7 @@ const Appointments = () => {
     <div className="p-4">
       <h1 className="text-center text-2xl font-bold mb-4">Appointments</h1>
       <div className="flex flex-wrap justify-center items-center">
-        {appointmentData &&
+        {appointmentData&&
           appointmentData.map((appointment) => (
             <div
               key={appointment._id}
@@ -87,7 +91,9 @@ const Appointments = () => {
               </div>
               <div className="px-3 py-3">
                 <span className="m-5 font-bold">Doctor:</span>
-                <span className="font-bold m-12">{appointment.doctor.name}</span>
+                <span className="font-bold m-12">
+                  {appointment.doctorname}
+                </span>
               </div>
               <div className="px-3 py-3">
                 <span className="m-5 font-bold">Department:</span>
