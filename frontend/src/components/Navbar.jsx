@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import {  useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 
-const Navbar = () => {
+ const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
 
