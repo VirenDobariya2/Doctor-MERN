@@ -5,6 +5,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const authMiddleware = require("../middlewares/authMiddleware");
 const Doctor = require("../models/userDoctorModels");
+const Slots = require("../models/sloatsModel");
 require("dotenv").config();
 
 // Register Data In User side
@@ -141,6 +142,7 @@ router.get("/approve-doctor", authMiddleware, async (req, res) => {
   // console.log(id)
 
   try {
+    
     const appoinment = await User.findById(id);
     if (!appoinment) {
       return res

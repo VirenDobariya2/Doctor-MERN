@@ -12,6 +12,11 @@ const DoctorSchema = new mongoose.Schema({
   password: { type: String, required: true },
   status: { type: String, default: "pending" },
   profilePic: { type: String },
+  slots: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Slot'
+}]
+
 });
 
 

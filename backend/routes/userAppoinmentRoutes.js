@@ -34,10 +34,11 @@ router.get("/appoinment-data", authMiddleware, async (req, res) => {
   // console.log("doc",doctorId)
   // const Doctor = req.userId
   try {
+    const doctor = await Doctor.findById({ _id: doctorId });
     if (!doctorId) {
       return res.status(400).json({ message: "Doctor ID is required" });
     }
-    const doctor = await Doctor.findById({ _id: doctorId });
+   
 
     const doctorname = doctor.firstName;
 
@@ -107,48 +108,6 @@ router.delete("/appoinment", async (req, res) => {
 });
 
 
-// GET available slots for a doctor
-// router.get('/doctor-slots', async (req, res) => {
-//   const { doctorId, date } = req.query;
-  
-//   // Fetch doctor's available slots for the given date
-//   const doctor = await Doctor.findById(doctorId);
-//   const availableSlots = doctor.slots.filter(slot => slot.date === date && !slot.booked);
-  
-//   res.json(availableSlots);
-// });
-
-// POST to create/update slots
-// router.post('/doctor-slots', async (req, res) => {
-//   const { doctorId, slots } = req.body;
-  
-//   // Update the doctor's available slots
-//   const doctor = await Doctor.findById(doctorId);
-//   doctor.slots = slots; // Replace with new slots
-//   await doctor.save();
-  
-//   res.json({ message: 'Slots updated successfully' });
-// });
-
-// DELETE to book a slot (mark as booked)
-// router.delete('/book-slot', async (req, res) => {
-//   const { doctorId, date, time } = req.body;
-  
-//   // Find and mark the slot as booked
-//   const doctor = await Doctor.findById(doctorId);
-//   const slot = doctor.slots.find(s => s.date === date && s.time === time);
-//   if (slot) {
-//     slot.booked = true;
-//     await doctor.save();
-    
-//     // Optionally, create an appointment record
-//     await Appointment.create({ doctorId, date, time, userId: req.userId });
-    
-//     res.json({ message: 'Slot booked successfully' });
-//   } else {
-//     res.status(404).json({ message: 'Slot not found' });
-//   }
-// });
 
 
 

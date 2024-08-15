@@ -51,7 +51,7 @@ import logo from "../assets/logo.png";
   const handleScrollAppoinment = () =>{
     navigate("/appoinment")
   }
-  console.log(isLoggedIn);
+  // console.log(isLoggedIn);
 
   return (
     <nav className="p-3 bg-gray-300">

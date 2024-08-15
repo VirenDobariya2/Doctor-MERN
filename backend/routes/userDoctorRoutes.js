@@ -1,10 +1,10 @@
 const express = require("express");
 const Doctor = require("../models/userDoctorModels");
-// const User = require("../models/userModels");
 const authMiddleware = require("../middlewares/authMiddleware");
 const router = express.Router();
 const multer = require("multer");
 const path = require("path");
+const Slots = require("../models/sloatsModel");
 
 router.get("/doctor-data", authMiddleware, async (req, res) => {
   try {
@@ -17,7 +17,7 @@ router.get("/doctor-data", authMiddleware, async (req, res) => {
     } else {
       doctors = await Doctor.find({ status: "pending" });
     }
-    
+
     res.status(200).json(doctors);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch Doctors", error });
@@ -26,6 +26,8 @@ router.get("/doctor-data", authMiddleware, async (req, res) => {
 
 router.patch("/approve-doctor", authMiddleware, async (req, res) => {
   const { docid } = req.body;
+
+  //add number of slots perday and if any off days for doctor
 
   try {
     const doctor = await Doctor.findByIdAndUpdate(
@@ -82,10 +84,10 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     // console.log("storage",file)
-    cb(null, Date.now() + path.extname(file.originalname)); 
+    cb(null, Date.now() + path.extname(file.originalname));
   },
 });
-const upload = multer({ storage});
+const upload = multer({ storage });
 
 // Route Upload img fro the Profile page
 
@@ -179,5 +181,106 @@ router.put("/update-user-info", authMiddleware, async (req, res) => {
     });
   }
 });
+
+// doctor slots..................
+
+router.get("/slots", authMiddleware, async (req, res) => {
+  const userId = req.userId;
+
+  try {
+    const date = Date.now()
+    const slots = await Slots.find({
+      doctorId: userId,
+
+      
+    });
+    // console.log("slots", slots);
+    res.json(slots);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching slots" });
+  }
+});
+
+// Create or update slots
+router.post("/slots", authMiddleware, async (req, res) => {
+  const userId = req.userId;
+
+  const { startDate, endDate, workingHours } = req.body;
+
+  try {
+    const slots = [];
+    const start = startDate.split("-")[2];
+    const end = endDate.split("-")[2];
+    
+    const numOfDays = end - start + 1;
+    for (let date = start; date <= end; date++) {
+      let startTime = 9;
+      for (let wrktime = 1; wrktime <= workingHours; wrktime++) {
+        let thisDate = createDateWithDayOnly(date);
+        let slot = new Slots({
+          doctorId: userId,
+          date: thisDate,
+          time: startTime,
+        });
+        // startTime++;
+        startTime++;
+        await slot.save();
+        slots.push(slot);
+      }
+    }
+
+    res.json(slots);
+  } catch (error) {
+    res.status(500).json({ message: "Error saving slot" });
+  }
+});
+
+const createDateWithDayOnly = (day) => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+
+  // Create the full date with year, month, and day
+  const date = new Date(year, month, day);
+
+  return date;
+};
+
+// Update the slot
+router.patch("/updateslots", authMiddleware, async (req, res) => {
+  const userId  = req.userId;
+  // const { startDate, endDate, workingHours } = req.body;
+
+  let { slotId, available, date, time } = req.body;
+  // console.log('available', slotId, available, date, time ) 
+  if(available==="unavailable"){
+    available = "booked"
+  }else if(available=== "booked"){
+    available = "cancelled"
+  }else{
+    available = "available"
+  }
+  
+  try {
+    
+      const updateObj = {
+        date:date,
+        time:time,
+        status:available
+      }
+  
+   
+    const slot = await Slots.findByIdAndUpdate(slotId,updateObj, { new: true });
+    if (!slot) {
+      return res.status(404).json({ message: "Slot not found" });
+    }
+    res.json(slot);
+  } catch (error) {
+    res.status(500).json({ message: "Error updating slot" });
+  }
+});
+
+
+
 
 module.exports = router;

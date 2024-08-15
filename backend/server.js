@@ -9,6 +9,7 @@ dotenv.config();
 const userRoutes = require("./routes/userRoutes");
 const userAppoinmentRoutes = require("./routes/userAppoinmentRoutes");
 const userDoctorRoutes = require("./routes/userDoctorRoutes");
+// const userSlotRoutes = require("./routes/")
 
 
 
@@ -22,6 +23,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/appoinment", userAppoinmentRoutes);
 app.use("/api/doctors", userDoctorRoutes);
 app.use('/uploads', express.static('uploads'));
+// app.use("/api/slot", userSlotRoutes)
 
 
 // app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
