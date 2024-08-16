@@ -14,7 +14,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     } else if (role === "doctor") {
       return <Navigate to="/deshboard" />;
     } else if (role === "patient") {
-      return <Navigate to="/" />;
+      return <Navigate to="/home" />;
     } else {
       return <Navigate to="/" />;
     }

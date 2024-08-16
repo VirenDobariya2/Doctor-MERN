@@ -2,9 +2,18 @@ import axios from "axios";
 import {  useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import {useNavigate} from "react-router-dom"
+import {Navigate, useNavigate} from "react-router-dom"
 
 const Login = () => {
+
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
+
+  if (token) {
+    return <Navigate to="/home" />;
+  }
+
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -63,7 +72,7 @@ const Login = () => {
   
 
   return (
-    <div className="bg-doctor absolute inset-0 min-h-screen bg-cover bg-center ">
+    <div className="bg-doctor bg-fixed h-screen bg-cover bg-no-repeat">
       <div className=" flex items-center justify-center min-h-full">
         <form
           onSubmit={handleSubmit}

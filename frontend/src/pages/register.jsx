@@ -54,7 +54,7 @@ const Register = () => {
 
   return (
     <>
-      <div className="bg-doctor absolute inset-0 w-auto h-auto bg-cover ">
+      <div className="bg-doctor bg-fixed h-screen bg-cover bg-no-repeat ">
         <div className="flex items-center justify-center min-h-full">
           <form
             onSubmit={handleSubmit}

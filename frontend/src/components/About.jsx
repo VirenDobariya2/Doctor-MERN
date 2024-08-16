@@ -2,9 +2,10 @@ import about from "../assets/about.png"
 
 const About = () => {
   return (
-    <div className="text-center" id="userAbout">
+    <div className="container mx-auto ">
+    <div className="text-center " id="userAbout">
       
-      <h1 className="mt-10 mb-8 uppercase font-bold text-4xl">About Me</h1>
+      <h1 className="mt-10 mb-8 uppercase font-bold text-4xl ">About Me</h1>
       <h1 className="mt-5 text-2xl text-slate-600">Committed To Health Excellence</h1>
       <div className="flex">
       <img src={about} alt="about"/>
@@ -26,6 +27,7 @@ const About = () => {
         </p>
        
       </form>
+      </div>
       </div>
       </div>
     

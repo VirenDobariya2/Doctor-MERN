@@ -11,6 +11,8 @@ import Service from "../components/Service"
 
 const Home = () => {
 
+ 
+
   const getData = async()=>{
     try {
       const token = localStorage.getItem("token");
@@ -28,13 +30,14 @@ const Home = () => {
   })
   return (
     <>
+
     <Navbar />
       <Hero/>  
       <Department/>
       <About/>
       <Service/> 
       <Connect/>
-    
+      
     </>
   )
 }

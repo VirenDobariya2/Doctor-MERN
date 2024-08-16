@@ -3,7 +3,7 @@ import { Link } from "react-scroll";
 
 const Connect = () => {
   return (
-    <div id="userConnect">
+    <div className="container mx-auto" id="userConnect">
       <div className="bg-blue-900">
         <div className=" flex justify-around mx-20  mt-12 py-16">
           <div className="justify-center items-center text-white">

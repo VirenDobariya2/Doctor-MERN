@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import DepartmentCard from '../components/DepartmentCard';
 import axios from 'axios';
+import { AppContext } from './context/Context';
 
 
 const Department = () => {
+  const { setAllDoctors} = useContext(AppContext);
 
   const [departments, setDepartments] = useState([]);
 
@@ -23,7 +25,9 @@ const Department = () => {
         }
       );
       // console.log("doctor", doctors)
+      // setDoctors(doctors.data)
       setDepartments(doctors.data);
+      setAllDoctors(doctors.data)
     } catch (error) {
       toast.error("Failed to doctors");
     }

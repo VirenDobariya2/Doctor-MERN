@@ -55,7 +55,8 @@ import logo from "../assets/logo.png";
 
   return (
     <nav className="p-3 bg-gray-300">
-      <div className="flex justify-around items-baseline">
+      <div className="container  mx-auto justify-center items-center ">
+      <div className="flex justify-around  items-baseline  ">
         <div className=" text-white text-lg font-bold">
           <img src={logo} alt="Logo" className="h-12 w-28 inline-block mr-2" />
         </div>
@@ -97,6 +98,7 @@ import logo from "../assets/logo.png";
             </button>
           )}
         </div>
+      </div>
       </div>
     </nav>
   );

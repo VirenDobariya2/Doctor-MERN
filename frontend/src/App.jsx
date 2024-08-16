@@ -12,6 +12,7 @@ import About from "./components/About";
 import Service from "./components/Service";
 import AdminUser from "./admin/AdminUser";
 import Inbox from "./components/doctor/Inbox";
+import PublicRoutes from "./PublicRoutes";
 
 const App = () => {
   return (
@@ -19,13 +20,13 @@ const App = () => {
       <ContextProvider>
         <Router>
           <Routes>
-            {/* not Protect */}
+           
             <Route path="/" element={<Login />}></Route>
             <Route path="/register" element={<Ragister />}></Route>
+           
 
             {/* is Protect */}
             {/* User Side Pages */}
-
             <Route element={<ProtectedRoute allowedRoles={["patient"]} />}>
               <Route path="/home" element={<Home />}></Route>
               <Route path="/appoinment" element={<Appoinment />}></Route>
