@@ -7,7 +7,7 @@ import {Navigate, useNavigate} from "react-router-dom"
 const Login = () => {
 
   const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
+  
 
   if (token) {
     return <Navigate to="/home" />;

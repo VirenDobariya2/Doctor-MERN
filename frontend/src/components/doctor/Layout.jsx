@@ -72,7 +72,7 @@ const Layout = () => {
           </ul>
         </div>
       </div>
-      <div className="ml-64 p-4">{renderView()}</div>
+      <div className="md:ml-64 md:p-4">{renderView()}</div>
     </div>
   );
 };

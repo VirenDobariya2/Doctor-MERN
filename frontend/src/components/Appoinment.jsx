@@ -6,6 +6,12 @@ import "react-phone-input-2/lib/style.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
+import SlotList from "./slotList/SlotList";
+import moment from "moment";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+// import TimePicker from "react-time-picker";
+import instance from "../axiosINstance/axiosInstance";
 
 const Appointment = () => {
   const {
@@ -25,6 +31,7 @@ const Appointment = () => {
     department: selectedDepartment,
     gender: "",
     time: "",
+    slotId: null,
   });
 
   const dropREf = useRef(null);
@@ -32,9 +39,9 @@ const Appointment = () => {
   const [doctor, setDoctors] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [filteredDoctors, setfilteredDoctors] = useState([]);
-  // const [filteredDepartment, setfilteredDepartment] = useState([]);
   const [isDisabled, setisDisabled] = useState(true);
-  const [isTimeDisabled, setIsTimeDisabled] = useState(true);
+  const [slotfetched, setslotfetched] = useState(true);
+  const [doctorSlots, setDoctorSlots] = useState([]);
 
   useEffect(() => {
     const getDoctors = async () => {
@@ -66,8 +73,44 @@ const Appointment = () => {
   //   }));
   // }, [selectedDoctor, selectedDepartment]);
 
-  const handleChange = (e) => {
+  const fetchSlotListforDoctor = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        `http://localhost:3000/api/appoinment/docSlots/${id}`,
+        {
+          headers: {
+            authorization: token,
+          },
+        }
+      );
+      const availableSlots = response.data.filter(
+        (slot) => slot.status === "available"
+      );
+
+      return availableSlots;
+    } catch (error) {}
+  };
+
+  useEffect(() => {
+    (async () => {
+      const doctorSlots = await fetchSlotListforDoctor(selectedDoctor);
+
+      const now = Date.now();
+      const futureSlots = doctorSlots.filter(
+        (slot) =>
+          moment(slot.date).isAfter(now) ||
+          (moment(slot.date).isSame(now, "day") &&
+            moment(slot.time, "HH:mm").isAfter(now))
+      );
+
+      setDoctorSlots(futureSlots);
+    })();
+  }, [selectedDoctor]);
+
+  const handleChange = async (e) => {
     const { name, value } = e.target;
+
     setFormData({
       ...formData,
       [name]: value,
@@ -88,196 +131,299 @@ const Appointment = () => {
       setfilteredDoctors(FilteredDoctors);
       setisDisabled(false);
       dropREf.current.click();
-    } else if (name === "date"){
-      setIsTimeDisabled(false)
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!formData?.slotId) return;
+
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/appoinment/appoinments",
-        formData
-      );
+      console.log("Form Data being sent:", formData);
+      const response = await instance({
+        url: "appoinment/appoinments",
+        method: "POST",
+        data: formData,
+      });
       console.log("Appointment created successfully:", response.data);
       setFormData({
         name: "",
         date: "",
+        time: "",
         symptoms: "",
         doctor: selectedDoctor,
         department: setSelectedDepartment,
         gender: "",
-        time: "",
-        
+        slotId: null,
       });
 
       toast.success("Appointment created successfully");
+      navigate("/home");
     } catch (error) {
       console.log(error);
       toast.error("Failed to create appointment", error);
     }
   };
 
-  const handleBook = () => {
-    setTimeout(() => {
-      navigate("");
-    }, 1000);
+  const filterDates = (date) => {
+    return doctorSlots.some((slot) => moment(slot.date).isSame(date, "day"));
   };
+
+  const handleDateChange = (e) => {
+    const date = new Date(e);
+    const utcDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+    // const extaxtDatw = `${date.getMonth()}- ${date.getDay()}`
+    const isoString = utcDate.toISOString();
+    // console.log(extaxtDatw);
+    setFormData((prevState) => ({
+      ...prevState,
+      date: date,
+    }));
+  };
+
+  const handleTimeChange = (e) => {
+    const time = new Date(e); // Convert to Date object
+    const formattedTime = time.toLocaleString('en-US', {
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true
+    });
+    // console.log("formattedTime",formattedTime)
+    setFormData({ 
+        ...formData, 
+        time: formattedTime // Store the formatted time in the form data
+    });
+};
+  const filterAvailableTimes = () => {
+    if (!formData.doctor || !formData.date) return [];
+
+    return doctorSlots
+      .filter(
+        (slot) =>
+          slot.doctorId === formData.doctor &&
+          moment(slot.date).isSame(moment(formData.date), "day")
+      )
+      .map((slot) => moment(slot.time, "HH:mm").format("HH:mm"));
+  };
+
+  useEffect(() => {
+    const isoString = moment(formData.date).toISOString();
+    const timeFormat = formData.time.split(":");
+    const selectedSlot = doctorSlots.filter(
+      (slot) => slot.date == isoString && slot.time == timeFormat[0]
+    );
+
+    if (selectedSlot.length > 0) {
+      setFormData({ ...formData, slotId: selectedSlot[0]._id });
+    }
+  }, [formData.time]);
 
   return (
     <div className="container mx-auto bg-blue-100 bg-cover bg-fixed h-screen">
-      <div >
-        <h2 className="text-2xl text-center py-5 font-bold mb-8 uppercase text-black">
+      <div>
+        <h2 className="text-2xl text-center py-3 font-bold mb-8 uppercase text-black">
           Appointment
         </h2>
-        </div>
-        <div className=" bg-gradient-to-r from-blue-400 box-content to-indigo-500 p-10 rounded-md">
-          <div className="gap-5 flex flex-col md:flex-row">
-            <div className=" ml-14 md:w-1/2 p-10 ">
-              <img
-                src={appointmentImg}
-                alt="Appointment"
-                className="object-cover rounded-md"
-              />
-            </div>
-            <form onSubmit={handleSubmit}>
-              <div className="w-full">
-                <div className="w-full mb-4">
-                  <label className="block font-bold mb-2">Patient Name *</label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="block w-96 rounded-md border border-slate-300 bg-white px-3 py-2 placeholder-slate-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-                    required
-                  />
-                </div>
+      </div>
+      <div className=" bg-gradient-to-r from-blue-400 box-content to-indigo-500 p-10 rounded-md">
+        <div className="gap-5 flex flex-col md:flex-row">
+          <div className=" ml-14 md:w-1/2 p-10 ">
+            <img
+              src={appointmentImg}
+              alt="Appointment"
+              className="object-cover rounded-md"
+            />
+          </div>
+          <form onSubmit={handleSubmit}>
+            <div className="w-full">
+              <div className="w-full mb-4">
+                <label className="block font-bold mb-2">Patient Name *</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="block w-96 rounded-md border border-slate-300 bg-white px-3 py-2 placeholder-slate-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                  required
+                />
+              </div>
 
+              <div className="w-full mb-4">
+                <label className="block font-bold mb-2">Symptoms </label>
+                <input
+                  type="text"
+                  id="symptoms"
+                  name="symptoms"
+                  value={formData.symptoms}
+                  onChange={handleChange}
+                  className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 placeholder-slate-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                />
+              </div>
+              <div className="flex gap-2">
                 <div className="w-full mb-4">
-                  <label className="block font-bold mb-2">Symptoms </label>
-                  <input
-                    type="text"
-                    id="symptoms"
-                    name="symptoms"
-                    value={formData.symptoms}
-                    onChange={handleChange}
-                    className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 placeholder-slate-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-                  />
-                </div>
-                <div className="flex gap-2">
-                  
-                  <div className="w-full mb-4">
-                    <label className="block font-bold mb-2">Department *</label>
-                    <select
-                      // ref={dropREf}
-                      id="department"
-                      name="department"
-                      value={formData.department}
-                      onChange={handleSelectChange}
-                      className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 placeholder-slate-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-                      required
-                    >
-                      <option value="" disabled>
-                        Select Department
-                      </option>
-                      {departments.map((departments) => (
-                        <option
-                          key={departments._id}
-                          value={departments.doctorField}
-                        >
-                          {departments.doctorField}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="w-full mb-4">
-                    <label className="block font-bold mb-2">Doctor *</label>
-                    <select
-                      ref={dropREf}
-                      id="doctor"
-                      name="doctor"
-                      value={formData.doctor}
-                      onChange={handleSelectChange}
-                      className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 placeholder-slate-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-                      required
-                      disabled={isDisabled}
-                    >
-                      <option value="" disabled>
-                        Select Doctor
-                      </option>
-                      {filteredDoctors.map((doctor) => (
-                        <option key={doctor._id} value={doctor._id}>
-                          {doctor.firstName}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                <div className="w-full mb-4">
-                  <label className="block font-bold mb-2">Gender *</label>
+                  <label className="block font-bold mb-2">Department *</label>
                   <select
-                    id="gender"
-                    name="gender"
-                    value={formData.gender}
-                    onChange={handleChange}
+                    id="department"
+                    name="department"
+                    value={formData.department}
+                    onChange={handleSelectChange}
                     className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 placeholder-slate-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
                     required
                   >
                     <option value="" disabled>
-                      Select Gender
+                      Select Department
                     </option>
-                    <option>Male</option>
-                    <option>Female</option>
+                    {departments.map((departments) => (
+                      <option
+                        key={departments._id}
+                        value={departments.doctorField}
+                      >
+                        {departments.doctorField}
+                      </option>
+                    ))}
                   </select>
                 </div>
-                <div className="flex gap-2">
-                  <div className="w-full mb-4 ">
+                <div className="w-full mb-4">
+                  <label className="block font-bold mb-2">Doctor *</label>
+                  <select
+                    ref={dropREf}
+                    id="doctor"
+                    name="doctor"
+                    value={formData.doctor}
+                    onChange={handleSelectChange}
+                    className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 placeholder-slate-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                    required
+                    disabled={isDisabled}
+                  >
+                    <option value="" disabled>
+                      Select Doctor
+                    </option>
+                    {filteredDoctors.map((doctor) => (
+                      <option key={doctor._id} value={doctor._id}>
+                        {doctor.firstName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <div>
+                  {/* {doctorSlots && doctorSlots.length > 0 ? (
+                    <>
+                      {doctorSlots.map((slots, index) => (
+                        <div key={index}>
+                          <SlotList slots={slots} />
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    <></>
+                  )} */}
+                  <div className="w-48 mb-4 ">
                     <label className="block font-bold mb-2">
                       Select Date *
                     </label>
-                    <input
-                      type="date"
-                      id="date"
-                      name="date"
+                    <DatePicker
+                      // icon={}
+                      placeholderText="DD-MMM-YYYY"
                       value={formData.date}
-                      onChange={handleChange}
-                      className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 placeholder-slate-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                      selected={formData.date ? new Date(formData.date) : null}
+                      onChange={handleDateChange}
+                      filterDate={filterDates}
+                      className="mb-4  block w-full rounded-md border border-slate-300 bg-white px-3 py-2 placeholder-slate-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
                       required
-                    />
-                  </div>
-                  <div className="w-full mb-4">
-                    <label className="block font-bold mb-2">Time *</label>
-                    <input
-                      type="time"
-                      id="time"
-                      name="time"
-                      value={formData.time}
-                      onChange={handleChange}
-                      className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 placeholder-slate-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-                      required
-                      disabled
+                      disabled={formData.doctor === ""}
                     />
                   </div>
                 </div>
 
+                <div className="w-full mb-4">
+                  <label className="block font-bold mb-2">Time *</label>
+                  <select
+                    id="time"
+                    name="time"
+                    value={formData.time}
+                    onChange={(e) => handleTimeChange(e.target.value)}
+                    className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 placeholder-slate-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                    required
+                    disabled={!formData.date || !filterAvailableTimes().length}
+                  >
+                    <option value="" disabled>
+                      Select a time
+                    </option>
+                    {filterAvailableTimes().map((time) => (
+                      <option key={time} value={time}>
+                        {time}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* <input
+                    type="time"
+                    id="time"
+                    name="time"
+                    value={formData.time}
+                    onChange={handleTimeChnage}
+                    filterTimes={filterTimes}
+                    className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 placeholder-slate-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                    required
+                    disabled={formData.date === ""}
+                    // min={
+                    //   doctorSlots.length > 0
+                    //     ? moment(doctorSlots[0].time, "HH:mm").format("HH:mm")
+                    //     : ""
+                    // }
+                    // max={
+                    //   doctorSlots.length > 0
+                    //     ? moment(
+                    //         doctorSlots[doctorSlots.length - 1].time,
+                    //         "HH:mm"
+                    //       ).format("HH:mm")
+                    //     : ""
+                    // }
+                    // step="1800"
+                  /> */}
+                </div>
+              </div>
+              <div className="w-full mb-4">
+                <label className="block font-bold mb-2">Gender *</label>
+                <select
+                  id="gender"
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleChange}
+                  className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 placeholder-slate-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                  required
+                >
+                  <option value="" disabled>
+                    Select Gender
+                  </option>
+                  <option>Male</option>
+                  <option>Female</option>
+                </select>
+              </div>
+              <div className="">
                 <button
                   type="submit"
-                  onClick={handleBook}
                   className="border hover:scale-95 duration-300 relative group cursor-pointer text-gray-800 overflow-hidden h-16 w-64 rounded-md bg-blue-300 p-2 flex justify-center items-center font-extrabold"
                 >
                   <div className="absolute right-2 -top-4 group-hover:top-1 group-hover:right-2 z-10 w-32 h-32 rounded-full group-hover:scale-150 duration-500 bg-sky-800"></div>
                   <p className="z-40">Book Appointment</p>
                 </button>
               </div>
-            </form>
-          </div>
+              <div className="">
+                Click Here ?{" "}
+                <a className="font-medium underline ml-1" href="/home">
+                  Home
+                </a>
+              </div>
+            </div>
+          </form>
         </div>
-        <ToastContainer />
-     
+      </div>
+      <ToastContainer />
     </div>
   );
 };

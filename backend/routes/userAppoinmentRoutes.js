@@ -3,7 +3,7 @@ const Appoinment = require("../models/userAppoinmentModels");
 const authMiddleware = require("../middlewares/authMiddleware");
 const router = express.Router();
 const Doctor = require("../models/userDoctorModels");
-const { appoinments, appoinmentdata, approve, approves, appoinment } = require("../controller/appointmentController");
+const { appoinments, appoinmentdata, approve, approves, appoinment,getDoctorlots,bookSlot } = require("../controller/appointmentController");
 // const mongoose = require("mongoose");
 
 router.post("/appoinments", appoinments);
@@ -20,6 +20,13 @@ router.get("/approve", authMiddleware, approves);
 
 // Delete appointment
 router.delete("/appoinment", appoinment);
+
+//get slots according to doctor id
+
+router.get("/docSlots/:id",authMiddleware,getDoctorlots)
+
+
+router.patch('/bookslot',authMiddleware,bookSlot)
 
 
 
