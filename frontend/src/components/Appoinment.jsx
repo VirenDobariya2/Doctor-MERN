@@ -10,7 +10,9 @@ import SlotList from "./slotList/SlotList";
 import moment from "moment";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-// import TimePicker from "react-time-picker";
+import CustomTimePicker from '../components/CustomTimePicker/CustomTimePicker';
+import TimePicker from "react-time-picker";
+import "react-time-picker/dist/TimePicker.css";
 import instance from "../axiosINstance/axiosInstance";
 
 const Appointment = () => {
@@ -75,21 +77,18 @@ const Appointment = () => {
 
   const fetchSlotListforDoctor = async (id) => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(
-        `http://localhost:3000/api/appoinment/docSlots/${id}`,
-        {
-          headers: {
-            authorization: token,
-          },
-        }
-      );
+      const response = await instance({
+        url:`appoinment/docSlots/${id}`,
+        method:"GET",
+      })
       const availableSlots = response.data.filter(
         (slot) => slot.status === "available"
       );
 
       return availableSlots;
-    } catch (error) {}
+    } catch (error) {
+      console.error("Error fetching slot list:", error);
+    }
   };
 
   useEffect(() => {
@@ -138,9 +137,9 @@ const Appointment = () => {
     e.preventDefault();
 
     if (!formData?.slotId) return;
+    console.log("Form Data being sent:", formData);
 
     try {
-      console.log("Form Data being sent:", formData);
       const response = await instance({
         url: "appoinment/appoinments",
         method: "POST",
@@ -159,7 +158,9 @@ const Appointment = () => {
       });
 
       toast.success("Appointment created successfully");
-      navigate("/home");
+      setTimeout(() => {
+        navigate("/home");
+      }, 1000);
     } catch (error) {
       console.log(error);
       toast.error("Failed to create appointment", error);
@@ -182,36 +183,35 @@ const Appointment = () => {
     }));
   };
 
-  const handleTimeChange = (e) => {
-    const time = new Date(e); // Convert to Date object
-    const formattedTime = time.toLocaleString('en-US', {
-        hour: 'numeric',
-        minute: 'numeric',
-        hour12: true
-    });
-    // console.log("formattedTime",formattedTime)
+  const handleTimeChange = (newTime) => {
+
+    console.log(newTime)
+    
     setFormData({ 
         ...formData, 
-        time: formattedTime // Store the formatted time in the form data
+        time: newTime
     });
+
 };
   const filterAvailableTimes = () => {
     if (!formData.doctor || !formData.date) return [];
-
     return doctorSlots
       .filter(
         (slot) =>
           slot.doctorId === formData.doctor &&
           moment(slot.date).isSame(moment(formData.date), "day")
       )
-      .map((slot) => moment(slot.time, "HH:mm").format("HH:mm"));
+      .map((slot) => moment(slot.time, "h:mm a").format('h:mm a '));
   };
 
   useEffect(() => {
     const isoString = moment(formData.date).toISOString();
-    const timeFormat = formData.time.split(":");
+    // const timeFormat = formData.time.split(":");
+    const timeFormat = moment(formData.time, 'h:mm a ').format('h:mm a');
+
+    console.log(doctorSlots,'timeFormat',timeFormat)
     const selectedSlot = doctorSlots.filter(
-      (slot) => slot.date == isoString && slot.time == timeFormat[0]
+      (slot) => slot.date == isoString && slot.time == timeFormat
     );
 
     if (selectedSlot.length > 0) {
@@ -341,14 +341,14 @@ const Appointment = () => {
 
                 <div className="w-full mb-4">
                   <label className="block font-bold mb-2">Time *</label>
-                  <select
+                  {/* <select
                     id="time"
                     name="time"
                     value={formData.time}
                     onChange={(e) => handleTimeChange(e.target.value)}
                     className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 placeholder-slate-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
                     required
-                    disabled={!formData.date || !filterAvailableTimes().length}
+                    disabled={!formData.date || !filterAvailableTimes()}
                   >
                     <option value="" disabled>
                       Select a time
@@ -358,7 +358,12 @@ const Appointment = () => {
                         {time}
                       </option>
                     ))}
-                  </select>
+                  </select> */}
+                   <CustomTimePicker
+                    value={formData.time}
+                    onChange={handleTimeChange}
+                    availableTimes={filterAvailableTimes()}
+                  />
 
                   {/* <input
                     type="time"
@@ -414,7 +419,7 @@ const Appointment = () => {
                 </button>
               </div>
               <div className="">
-                Click Here ?{" "}
+                Click Here ?
                 <a className="font-medium underline ml-1" href="/home">
                   Home
                 </a>

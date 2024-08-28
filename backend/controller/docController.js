@@ -4,6 +4,11 @@ const router = express.Router();
 const multer = require("multer");
 const path = require("path");
 const Slots = require("../models/sloatsModel");
+const {
+  formatTime12Hour,
+  createDateWithDayOnly,
+  convertTo24Hour,
+} = require("../utils/utils");
 
 const doctordata = async (req, res) => {
   try {
@@ -171,7 +176,23 @@ const slots = async (req, res) => {
 const slot = async (req, res) => {
   const userId = req.userId;
 
-  const { startDate, endDate, workingHours } = req.body;
+  let { startDate, endDate, workingHours, startingTime } = req.body;
+  let startday = startDate.split("-")[2];
+
+  const dateTocreate = createDateWithDayOnly(startday);
+
+  let availableSlots = await Slots.find({
+    doctorId: userId,
+    date: dateTocreate,
+  });
+
+  // console.log(availableSlots);
+
+  if (availableSlots.length > 7) {
+    return res.status(402).json({ message: "Max slots booked" });
+  }
+
+  // console.log('sdsdsdsds')
 
   try {
     const slots = [];
@@ -180,15 +201,16 @@ const slot = async (req, res) => {
 
     const numOfDays = end - start + 1;
     for (let date = start; date <= end; date++) {
-      let startTime = 9;
-      for (let wrktime = 1; wrktime <= workingHours; wrktime++) {
+      let setStartTime = startingTime || "9:00 am";
+      let startTime = convertTo24Hour(setStartTime);
+
+      for (let wrkTime = 1; wrkTime <= workingHours; wrkTime++) {
         let thisDate = createDateWithDayOnly(date);
         let slot = new Slots({
           doctorId: userId,
           date: thisDate,
-          time: startTime,
+          time: formatTime12Hour(startTime),
         });
-        // startTime++;
         startTime++;
         await slot.save();
         slots.push(slot);
@@ -199,16 +221,6 @@ const slot = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Error saving slot" });
   }
-};
-const createDateWithDayOnly = (day) => {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth();
-
-  // Create the full date with year, month, and day
-  const date = new Date(year, month, day);
-
-  return date;
 };
 
 const updateslots = async (req, res) => {

@@ -7,57 +7,53 @@ const Slots = require("../models/sloatsModel");
 const { default: mongoose } = require("mongoose");
 
 const appoinments = async (req, res) => {
-  console.log("req",req.body)
+  // console.log("req", req.body);
   const userId = req.userId;
 
   const {
     name,
-    date,
     slotId,
     symptoms,
     doctor,
-    department,
     gender,
   } = req.body;
 
+  const doctorsSLots = await Slots.findByIdAndUpdate(
+    slotId,
+    { userId: userId, status: "booked" },
+    { new: true }
+  );
+  const newAppointment = new Appoinment({
+    name,
+    slotId,
+    symptoms,
+    doctor,
+    gender,
+  });
 
-    const doctorsSLots = await Slots.findByIdAndUpdate(
-      slotId,
-      { userId: userId, status: "booked" },
-      { new: true }
-    );
-    const newAppointment = new Appoinment({
-      name,
-      slotId,
-      symptoms,
-      doctor,
-      gender,
-    });
-
-    const savedAppointment = await newAppointment.save();
-    res.status(200).json(savedAppointment);
-
+  const savedAppointment = await newAppointment.save();
+  res.status(200).json(savedAppointment);
 };
 
 const appoinmentdata = async (req, res) => {
   const doctorId = req.userId;
-
-  const docidd = new mongoose.Types.ObjectId(doctorId)
-  // console.log("doc",doctorId)
   // const Doctor = req.userId
+  
+  const docid = new mongoose.Types.ObjectId(doctorId);
   try {
-    const doctor = await Doctor.findById({ _id: doctorId });
-    if (!doctorId ) {
+    const doctor = await Doctor.findById( docid );
+    if (!doctor) {
       return res.status(400).json({ message: "Doctor ID is required" });
     }
+    // console.log("doc",doctor)
 
     const doctorname = doctor.firstName;
 
     const appointments = await Appoinment.find({
-      doctor: docidd,
-      status:"Pending"
-    });
-   
+      doctor: docid,
+      status: "Pending",
+    }).populate('slotId');
+// console.log(appointments)
 
     if (!appointments) {
       return res
@@ -68,6 +64,7 @@ const appoinmentdata = async (req, res) => {
     const appointmentsWithDoctorName = appointments.map((appointment) => ({
       ...appointment._doc,
       doctorname,
+      // slotId: appointment.slotId 
     }));
 
     res.status(200).json(appointmentsWithDoctorName);

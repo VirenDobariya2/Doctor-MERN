@@ -68,23 +68,18 @@ const Inbox = () => {
               </div>
               <div className="px-3 py-3">
                 <span className="m-5 font-bold">Doctor:</span>
-                <span className="font-bold m-12">{appointment.doctor}</span>
+                <span className="font-bold m-12">
+                  {appointment.doctorname}
+                </span>
               </div>
-              <div className="px-3 py-3">
-                <span className="m-5 font-bold">Department:</span>
-                <span className="font-bold m-2">{appointment.department}</span>
-              </div>
+              
               <div className="px-3 py-3">
                 <span className="m-5 font-bold">Date:</span>
-                <span className="font-bold m-16">{appointment.date}</span>
+                <span className="font-bold m-16">{appointment.slotId?.date.toLocaleDateString("en-US") } </span>
               </div>
               <div className="px-3 py-3">
                 <span className="m-6 font-bold">Time:</span>
-                <span className="font-bold m-14">{appointment.time}</span>
-              </div>
-              <div className="px-3 py-3">
-                <span className="m-5 font-bold">Message:</span>
-                <span className="font-bold m-8">{appointment.message}</span>
+                <span className="font-bold m-14">{appointment.slotId?.time  }</span>
               </div>
               <button
                 className="relative  text-black text-base font-bold nded-full overflow-hidden  duration-400 ease-in-out shadow-md hover:scale-105 hover:text-white hover:shadow-lg active:scale-90 before:absolute before:top-0 bg-white before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-green-500 before:to-green-300 before:transition-all before:duration-500 before:ease-in-out before:z-[-1] before:rounded-lg hover:before:left-0 border float-end px-8 py-2  m-5 rounded-lg transition duration-300"

@@ -15,6 +15,7 @@ const DoctorSlot = () => {
   const [slots, setSlots] = useState([]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  // const [startingTime, setStartingTime] = useState("")
   const [events, setEvent] = useState("");
   const [workingHours, setWorkingHours] = useState("");
   const [selectedDateSlots, setSelectedDateSlots] = useState([]);
@@ -74,13 +75,17 @@ const DoctorSlot = () => {
           startDate,
           endDate,
           workingHours,
+          
         },
         { headers: { authorization: token } }
       );
+      console.log(response)
       // setSlots([...slots, ...response.data]);
       setStartDate("");
       setEndDate("");
       setWorkingHours("");
+      // setStartingTime("");
+
     } catch (error) {
       console.error(
         "Error creating slot:",
@@ -174,7 +179,7 @@ const DoctorSlot = () => {
   
 
   const eventsnew = slots.map((slot) => ({
-    title: `Slot: ${slot.time}:00`,
+    title: `Slot: ${slot.time}`,
     start: new Date(slot.date),
     end: new Date(slot.date),
     availablity: slot.status,

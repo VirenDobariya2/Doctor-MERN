@@ -29,7 +29,7 @@ const SlotList = ({ slots }) => {
         }`}
       >
         <p>{moment(slots.date).format("MM-DD")}</p>
-        {slots.time && <p>{moment(slots.time, "HH:mm").format("HH:mm")}</p>}
+        {slots.time && <p>{moment(slots.time, "HH:mm").format("h:mm a")}</p>}
         <p>{slots.status}</p>
       </div>
     </>

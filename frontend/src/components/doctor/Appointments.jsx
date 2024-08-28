@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 
+
 const Appointments = () => {
   const [appointmentData, setAppointmentData] = useState(null);
   // const [error, setError] = useState(null);
@@ -13,7 +14,7 @@ const Appointments = () => {
         "http://localhost:3000/api/appoinment/appoinment-data/?data=pending",
         { headers: { authorization: token } }
       );
-      console.log("Response from server:", response.data);  
+      // console.log("Response from server:", response.data);  
       setAppointmentData(response.data);
       // console.log("data", response.data)
     } catch (err) {
@@ -21,7 +22,7 @@ const Appointments = () => {
     }
   };
   
-
+console.log(appointmentData)
 //  
 
   const handleApprove = async (id) => {
@@ -98,11 +99,11 @@ const Appointments = () => {
               
               <div className="px-3 py-3">
                 <span className="m-5 font-bold">Date:</span>
-                <span className="font-bold m-16">{appointment.date}</span>
+                <span className="font-bold m-16">{appointment.slotId?.date.toString() } </span>
               </div>
               <div className="px-3 py-3">
                 <span className="m-6 font-bold">Time:</span>
-                <span className="font-bold m-14">{appointment.time}</span>
+                <span className="font-bold m-14">{appointment.slotId?.time  }</span>
               </div>
               
               <div className="flex justify-between">
