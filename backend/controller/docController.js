@@ -5,9 +5,9 @@ const multer = require("multer");
 const path = require("path");
 const Slots = require("../models/sloatsModel");
 const {
-  formatTime12Hour,
+  // formatTime12Hour,
   createDateWithDayOnly,
-  convertTo24Hour,
+  // convertTo24Hour,
 } = require("../utils/utils");
 
 const doctordata = async (req, res) => {
@@ -56,6 +56,7 @@ const approvedoctors = async (req, res) => {
     res.status(500).json({ message: "Failed to approve doctor", error });
   }
 };
+
 const approvedoctor = async (req, res) => {
   try {
     const approvedDoctor = await Doctor.find({ status: "approved" });
@@ -74,6 +75,8 @@ const doctorremove = async (req, res) => {
     res.status(500).send(err);
   }
 };
+
+
 const uploadprofilepic = async (req, res) => {
   try {
     // console.log("sscsdsdsdsds")
@@ -173,55 +176,208 @@ const slots = async (req, res) => {
     res.status(500).json({ message: "Error fetching slots" });
   }
 };
-const slot = async (req, res) => {
-  const userId = req.userId;
+const mongoose = require('mongoose');
 
-  let { startDate, endDate, workingHours, startingTime } = req.body;
-  let startday = startDate.split("-")[2];
+// Assuming you have a Slots model
+// const bookSlots = mongoose.model('Slots', new mongoose.Schema({
+//     doctorId: String,
+//     date: String,  // Format: "yyyy-mm-dd"
+//     time: String   // Format: "hh:mm AM/PM"
+// }));
 
-  const dateTocreate = createDateWithDayOnly(startday);
+const convertTo24Hour = (time12h) => {
+    let [time, modifier] = time12h.split(' ');
+    let [hours, minutes] = time.split(':');
 
-  let availableSlots = await Slots.find({
-    doctorId: userId,
-    date: dateTocreate,
-  });
-
-  // console.log(availableSlots);
-
-  if (availableSlots.length > 7) {
-    return res.status(402).json({ message: "Max slots booked" });
-  }
-
-  // console.log('sdsdsdsds')
-
-  try {
-    const slots = [];
-    const start = startDate.split("-")[2];
-    const end = endDate.split("-")[2];
-
-    const numOfDays = end - start + 1;
-    for (let date = start; date <= end; date++) {
-      let setStartTime = startingTime || "9:00 am";
-      let startTime = convertTo24Hour(setStartTime);
-
-      for (let wrkTime = 1; wrkTime <= workingHours; wrkTime++) {
-        let thisDate = createDateWithDayOnly(date);
-        let slot = new Slots({
-          doctorId: userId,
-          date: thisDate,
-          time: formatTime12Hour(startTime),
-        });
-        startTime++;
-        await slot.save();
-        slots.push(slot);
-      }
+    if (modifier === 'pm' && hours !== '12') {
+        hours = parseInt(hours, 10) + 12;
     }
 
-    res.json(slots);
-  } catch (error) {
-    res.status(500).json({ message: "Error saving slot" });
-  }
+    if (modifier === 'am' && hours === '12') {
+        hours = 0;
+    }
+
+    return `${String(hours).padStart(2, '0')}:${minutes}`;
 };
+
+const formatTime12Hour = (time24h) => {
+    let [hours, minutes] = time24h.split(':');
+    let modifier = 'am';
+
+    if (parseInt(hours, 10) >= 12) {
+        modifier = 'pm';
+        if (parseInt(hours, 10) > 12) {
+            hours = String(parseInt(hours, 10) - 12);
+        }
+    }
+
+    if (hours === '0') {
+        hours = '12';
+    }
+
+    return `${String(hours).padStart(2, '0')}:${minutes} ${modifier}`;
+};
+
+const generateSlots = async (startDate, endDate, startingTime = "9:00 AM", workingHours = 8, userId) => {
+    const slots = [];
+
+    const [startYear, startMonth, startDay] = startDate.split("-").map(Number);
+    const [endYear, endMonth, endDay] = endDate.split("-").map(Number);
+
+    // Create Date objects for the start and end dates
+    const start = new Date(startYear, startMonth - 1, startDay); 
+    const end = new Date(endYear, endMonth - 1, endDay);
+
+    // Check if endDate is within the same month as startDate
+    if (start.getFullYear() !== end.getFullYear() || start.getMonth() !== end.getMonth()) {
+        throw new Error('Slot generation is allowed only for one month at a time.');
+    }
+
+    let current = new Date(start);
+
+    while (current <= end) {
+        const formattedDate = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}-${String(current.getDate()).padStart(2, '0')}`;
+        console.log(formattedDate,'formattedDate')
+        let startTime = convertTo24Hour(startingTime);
+
+        for (let hour = 0; hour < workingHours; hour++) {
+            const slotTime = formatTime12Hour(startTime);
+            const slot = new Slots({
+                doctorId: userId,
+                date: formattedDate,
+                time: slotTime,
+            });
+
+            await slot.save();
+            slots.push(slot);
+
+            const [hour24, minute] = startTime.split(':').map(Number);
+            startTime = `${String((hour24 + 1) % 24).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+        }
+        current.setDate(current.getDate() + 1);
+    }
+
+    return slots;
+};
+
+const slot = async (req, res) => {
+    try {
+        const userId = req.userId;
+        let { startDate, endDate, workingHours, startingTime } = req.body;
+
+        // Validate input
+        if (!startDate || !endDate || !workingHours ) {
+            return res.status(400).json({ error: 'Missing required fields.' });
+        }
+
+        workingHours = parseInt(workingHours, 10);
+        if (isNaN(workingHours) || workingHours <= 0) {
+            return res.status(400).json({ error: 'Invalid working hours.' });
+        }
+
+        const slots = await generateSlots(startDate, endDate, startingTime, workingHours, userId);
+
+        return res.status(200).json({ slots });
+    } catch (error) {
+        return res.status(400).json({ error: error.message });
+    }
+};
+
+
+
+// const slot = async (req, res) => {
+//   const userId = req.userId;
+
+//   let { startDate, endDate, workingHours, startingTime } = req.body;
+//   let startday = startDate.split("-")[2];
+//   let endday = endDate.split("-")[2];
+
+//   // console.log("startDate, endDate, workingHours, startingTime ,",startDate, endDate, workingHours, startingTime )
+
+//   // const dateTocreate = createDateWithDayOnly(startday, endday );
+
+//   let availableSlots = await Slots.find({
+//     doctorId: userId,
+//     date: startDate,
+//   });
+
+//   // console.log("availableSlots",availableSlots);
+
+//   if (availableSlots.length > 7) {
+//     return res.status(402).json({ message: "Max slots booked" });
+//   }
+
+//   // try {
+//   //   const slots = [];
+    
+//   //   const [startYear, startMonth, startDay] = startDate.split("-").map(Number);
+//   //   const [endYear, endMonth, endDay] = endDate.split("-").map(Number);
+
+//   //   // Create Date objects for the start and end dates
+//   //   const start = new Date(startYear, startMonth - 1, startDay); // Months are 0-based
+//   //   const end = new Date(endYear, endMonth - 1, endDay);
+
+//   //   let current = new Date(start);
+
+//   //   while (current <= end) {
+//   //       const formattedDate = formatDateToYMD(current);
+//   //       let startTime = convertTo24Hour(startingTime);
+
+//   //       for (let hour = 0; hour < workingHours; hour++) {
+//   //           const slotTime = formatTime12Hour(startTime);
+//   //           const slot = new Slots({
+//   //               doctorId: userId,
+//   //               date: formattedDate,
+//   //               time: slotTime,
+//   //           });
+
+//   //           await slot.save();
+//   //           slots.push(slot);
+
+//   //           // Increment startTime by 1 hour
+//   //           const [hour24, minute] = startTime.split(':').map(Number);
+//   //           startTime = `${String((hour24 + 1) % 24).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+//   //       }
+
+//   //       // Move to the next day
+//   //       current.setDate(current.getDate() + 1);
+//   //   }
+
+//   //   return slots;
+//   // } catch (error) {
+//   //   res.status(500).json({ message: "Error saving slot" });
+    
+//   // }
+
+//   try {
+//     const slots = [];
+//     const start = startDate.split("-")[2];
+//     const end = endDate.split("-")[2];
+
+//     // new Date('2024-08-29').toLocaleDateString()
+
+//     const numOfDays = end - start + 1;
+//     for (let date = start; date <= end; date++) {
+//       let setStartTime = startingTime || "9:00 am";
+//       let startTime = convertTo24Hour(setStartTime);
+//       for (let wrkTime = 1; wrkTime <= workingHours; wrkTime++) {
+//         let Date = createDateWithDayOnly(date);
+//         let slot = new Slots({
+//           doctorId: userId,
+//           date: Date,
+//           time: formatTime12Hour(startTime),
+//         });
+//         startTime++;
+//         await slot.save();
+//         slots.push(slot);
+//       }
+//     }
+
+//     res.json(slots);
+//   } catch (error) {
+//     res.status(500).json({ message: "Error saving slot" });
+//   }
+// };
 
 const updateslots = async (req, res) => {
   const userId = req.userId;

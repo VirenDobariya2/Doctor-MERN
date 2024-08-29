@@ -7,6 +7,7 @@ import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "react-responsive-modal/styles.css";
 import { Modal } from "react-responsive-modal";
+import instance from "../../axiosINstance/axiosInstance";
 
 const localizer = momentLocalizer(moment);
 // const today  = new Date();
@@ -28,7 +29,7 @@ const DoctorSlot = () => {
   });
 
   const onOpenModal = (event) => {
-    console.log('event',event)
+    console.log("event", event);
     setModalData({
       date: moment(event.start).format("YYYY-MM-DD"),
       time: moment(event.time).format("HH:mm"),
@@ -59,33 +60,29 @@ const DoctorSlot = () => {
     // setSlots(response.data);
   };
 
- 
   useEffect(() => {
-
     Slots();
   }, []);
 
   // Handle slot creation
   const handleCreateSlot = async () => {
-    const token = localStorage.getItem("token");
+    // console.log("slots", startDate);
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/doctors/slots",
-        {
-          startDate,
-          endDate,
-          workingHours,
-          
+      const response = await instance({
+        url: "doctors/slots",
+        method: "POST",
+        data: {
+          startDate: startDate,
+          endDate: endDate,
+          workingHours: workingHours,
         },
-        { headers: { authorization: token } }
-      );
-      console.log(response)
-      // setSlots([...slots, ...response.data]);
+      });
+      // console.log("slots", response);
+
       setStartDate("");
       setEndDate("");
       setWorkingHours("");
       // setStartingTime("");
-
     } catch (error) {
       console.error(
         "Error creating slot:",
@@ -102,15 +99,19 @@ const DoctorSlot = () => {
       const response = await axios.patch(
         `http://localhost:3000/api/doctors/updateslots`,
 
-        { slotId: modalData.slotId, available: modalData.status, date: modalData.date, time: modalData.time },
+        {
+          slotId: modalData.slotId,
+          available: modalData.status,
+          date: modalData.date,
+          time: modalData.time,
+        },
         // { slotId: modalData.slotId, available: modalData.status },
         { headers: { authorization: token } }
       );
-      const filterSlots = slots.filter((sl)=>sl._id != response.data._id);
-      Slots()
-      onCloseModal()
+      const filterSlots = slots.filter((sl) => sl._id != response.data._id);
+      Slots();
+      onCloseModal();
       // setSlots((prevState)=>[...prevState,filterSlots])
-
     } catch (error) {
       console.error(
         "Error updating slot:",
@@ -174,22 +175,19 @@ const DoctorSlot = () => {
   //   </div>
   // );
 
-
-  useEffect(()=>{
-  
-
-  const eventsnew = slots.map((slot) => ({
-    title: `Slot: ${slot.time}`,
-    start: new Date(slot.date),
-    end: new Date(slot.date),
-    availablity: slot.status,
-    slotId: slot._id,
-    allDay: true,
-    time:moment(slot.time,'H:mm')
-  }));
-  // console.log(slots,'eventsnew',eventsnew)
-  setEvent(eventsnew)
-  },[slots])
+  useEffect(() => {
+    const eventsnew = slots.map((slot) => ({
+      title: `Slot: ${slot.time}`,
+      start: new Date(slot.date),
+      end: new Date(slot.date),
+      availablity: slot.status,
+      slotId: slot._id,
+      allDay: true,
+      time: moment(slot.time, "H:mm"),
+    }));
+    // console.log("slots",slots,'eventsnew',eventsnew)
+    setEvent(eventsnew);
+  }, [slots]);
 
   return (
     <div className="p-4">
@@ -201,7 +199,7 @@ const DoctorSlot = () => {
           <input
             type="date"
             value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
+            onChange={(e) => {setStartDate(e.target.value),console.log("ddd",e.target.value)}}
             className="w-full p-2 border rounded"
           />
         </div>
@@ -210,7 +208,7 @@ const DoctorSlot = () => {
           <input
             type="date"
             value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
+            onChange={(e) => {setEndDate(e.target.value),console.log("gg",e.target.value)}}
             className="w-full p-2 border rounded"
           />
         </div>
@@ -239,23 +237,21 @@ const DoctorSlot = () => {
         Select a Date to View Slots
       </h2>
       <div style={{ height: 500 }}>
-        {
-          events && 
+        {events && (
           <Calendar
-          localizer={localizer}
-          events={events}
-          startAccessor="start"
-          endAccessor="end"
-          onSelectSlot={(slotInfo) => handleDateClick(slotInfo.start)}
-          onSelectEvent={handleSelectEvent}
-          eventPropGetter={eventStyleGetter}
-          // components={{ event: EventComponent }}
+            localizer={localizer}
+            events={events}
+            startAccessor="start"
+            endAccessor="end"
+            onSelectSlot={(slotInfo) => handleDateClick(slotInfo.start)}
+            onSelectEvent={handleSelectEvent}
+            eventPropGetter={eventStyleGetter}
+            // components={{ event: EventComponent }}
 
-          selectable
-          style={{ height: 700 }}
-        />
-        }
-
+            selectable
+            style={{ height: 700 }}
+          />
+        )}
       </div>
 
       <Modal open={open} onClose={onCloseModal} center>

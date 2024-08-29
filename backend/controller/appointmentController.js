@@ -18,7 +18,7 @@ const appoinments = async (req, res) => {
     gender,
   } = req.body;
 
-  const doctorsSLots = await Slots.findByIdAndUpdate(
+  const doctorsSlots = await Slots.findByIdAndUpdate(
     slotId,
     { userId: userId, status: "booked" },
     { new: true }
@@ -81,7 +81,7 @@ const approve = async (req, res) => {
       appid,
       { status: "approved" },
       { new: true }
-    );
+    ).populate('slotId');
 
     if (!approvedAppointment) {
       return res.status(404).send("Appointment not found");
@@ -118,9 +118,9 @@ const getDoctorlots = async (req, res) => {
 
     const doctorObjectId = new mongoose.Types.ObjectId(doctorID);
 
-    const doctorsSLots = await Slots.find({ doctorId: doctorObjectId });
+    const doctorsSlots = await Slots.find({ doctorId: doctorObjectId });
 
-    res.status(200).send(doctorsSLots);
+    res.status(200).send(doctorsSlots);
   } catch (err) {
     return res.status(400).json({ message: "Error" });
   }
@@ -132,13 +132,13 @@ const bookSlot = async (req, res) => {
 
     const slotId = req.body.id;
     //check for end cases, if already booked deny
-    const doctorsSLots = await Slots.findByIdAndUpdate(
+    const doctorsSlots = await Slots.findByIdAndUpdate(
       slotId,
       { userId: userId, status: "booked" },
       { new: true }
     );
 
-    res.status(204).send({ doctorsSLots: doctorsSLots });
+    res.status(204).send({ doctorsSlots: doctorsSlots });
   } catch (error) {}
 };
 

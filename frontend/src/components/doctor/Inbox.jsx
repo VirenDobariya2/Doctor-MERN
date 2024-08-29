@@ -75,7 +75,7 @@ const Inbox = () => {
               
               <div className="px-3 py-3">
                 <span className="m-5 font-bold">Date:</span>
-                <span className="font-bold m-16">{appointment.slotId?.date.toLocaleDateString("en-US") } </span>
+                <span className="font-bold m-16">{appointment.slotId?.date } </span>
               </div>
               <div className="px-3 py-3">
                 <span className="m-6 font-bold">Time:</span>

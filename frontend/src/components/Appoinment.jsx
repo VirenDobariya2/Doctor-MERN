@@ -42,7 +42,7 @@ const Appointment = () => {
   const [departments, setDepartments] = useState([]);
   const [filteredDoctors, setfilteredDoctors] = useState([]);
   const [isDisabled, setisDisabled] = useState(true);
-  const [slotfetched, setslotfetched] = useState(true);
+  // const [slotfetched, setslotfetched] = useState(true);
   const [doctorSlots, setDoctorSlots] = useState([]);
 
   useEffect(() => {
@@ -77,23 +77,33 @@ const Appointment = () => {
 
   const fetchSlotListforDoctor = async (id) => {
     try {
+      // console.log(`Fetching slots for doctor with ID: ${id}`);
       const response = await instance({
         url:`appoinment/docSlots/${id}`,
         method:"GET",
       })
+      // console.log("Response data:", response.data);
       const availableSlots = response.data.filter(
         (slot) => slot.status === "available"
       );
 
       return availableSlots;
     } catch (error) {
-      console.error("Error fetching slot list:", error);
+      console.error("Error fetching slot list:", error.response ? error.response.data : error.message);
     }
   };
 
   useEffect(() => {
+
+    console.log('doctorSlots',selectedDoctor)
+
+    if(!selectedDoctor)return
+
     (async () => {
       const doctorSlots = await fetchSlotListforDoctor(selectedDoctor);
+
+
+      console.log('doctorSlots',doctorSlots,selectedDoctor)
 
       const now = Date.now();
       const futureSlots = doctorSlots.filter(
@@ -173,9 +183,11 @@ const Appointment = () => {
 
   const handleDateChange = (e) => {
     const date = new Date(e);
-    const utcDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-    // const extaxtDatw = `${date.getMonth()}- ${date.getDay()}`
-    const isoString = utcDate.toISOString();
+    // const utcDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+    
+    const extaxtDatw = `${date.getMonth()}/${date.getDay()}/${date.getFullYear()}`
+    // console.log("datedatedatedate",extaxtDatw )
+    // const isoString = extaxtDatw.toISOString();
     // console.log(extaxtDatw);
     setFormData((prevState) => ({
       ...prevState,
@@ -185,11 +197,13 @@ const Appointment = () => {
 
   const handleTimeChange = (newTime) => {
 
+    console.log('newTime',newTime)
+
     console.log(newTime)
     
     setFormData({ 
         ...formData, 
-        time: newTime
+        time: newTime.trim()
     });
 
 };
@@ -205,14 +219,24 @@ const Appointment = () => {
   };
 
   useEffect(() => {
-    const isoString = moment(formData.date).toISOString();
-    // const timeFormat = formData.time.split(":");
-    const timeFormat = moment(formData.time, 'h:mm a ').format('h:mm a');
 
-    console.log(doctorSlots,'timeFormat',timeFormat)
+    const isoString = moment(formData.date).toISOString();
+    let stringDate = ''
+
+    if(typeof isoString == 'string'){
+       let dummy = isoString.split('T')[0]
+
+       stringDate = `${dummy}T00:00:00.000Z`
+
+    }
+    console.log('isoString', stringDate)
+
+    
+    const timeFormat = moment(formData.time, 'hh:mm a').format('hh:mm a');
     const selectedSlot = doctorSlots.filter(
-      (slot) => slot.date == isoString && slot.time == timeFormat
+      (slot) => slot.date == stringDate && slot.time == timeFormat
     );
+    // console.log(selectedSlot,'timeFormat',selectedSlot)
 
     if (selectedSlot.length > 0) {
       setFormData({ ...formData, slotId: selectedSlot[0]._id });
@@ -308,19 +332,10 @@ const Appointment = () => {
                   </select>
                 </div>
               </div>
+
+
               <div className="flex gap-2">
                 <div>
-                  {/* {doctorSlots && doctorSlots.length > 0 ? (
-                    <>
-                      {doctorSlots.map((slots, index) => (
-                        <div key={index}>
-                          <SlotList slots={slots} />
-                        </div>
-                      ))}
-                    </>
-                  ) : (
-                    <></>
-                  )} */}
                   <div className="w-48 mb-4 ">
                     <label className="block font-bold mb-2">
                       Select Date *
@@ -392,6 +407,7 @@ const Appointment = () => {
                   /> */}
                 </div>
               </div>
+
               <div className="w-full mb-4">
                 <label className="block font-bold mb-2">Gender *</label>
                 <select
