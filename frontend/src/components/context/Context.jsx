@@ -6,13 +6,13 @@ const AppContext = createContext();
 const ContextProvider = ({ children }) => {
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [selectedDoctor, setSelectedDoctor] = useState("");
-  const [allDoctors, setAllDoctors] = useState("");
+  const [allData, setAllData] = useState({ departments: [], doctors: [] });
 
   return (
     <AppContext.Provider
       value={{
-        allDoctors,
-        setAllDoctors,
+        allData,
+        setAllData,
         selectedDepartment,
         setSelectedDepartment,
         selectedDoctor,

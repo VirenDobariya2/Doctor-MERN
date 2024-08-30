@@ -176,14 +176,7 @@ const slots = async (req, res) => {
     res.status(500).json({ message: "Error fetching slots" });
   }
 };
-const mongoose = require('mongoose');
-
-// Assuming you have a Slots model
-// const bookSlots = mongoose.model('Slots', new mongoose.Schema({
-//     doctorId: String,
-//     date: String,  // Format: "yyyy-mm-dd"
-//     time: String   // Format: "hh:mm AM/PM"
-// }));
+// const mongoose = require('mongoose');
 
 const convertTo24Hour = (time12h) => {
     let [time, modifier] = time12h.split(' ');
@@ -229,15 +222,15 @@ const generateSlots = async (startDate, endDate, startingTime = "9:00 AM", worki
     const end = new Date(endYear, endMonth - 1, endDay);
 
     // Check if endDate is within the same month as startDate
-    if (start.getFullYear() !== end.getFullYear() || start.getMonth() !== end.getMonth()) {
-        throw new Error('Slot generation is allowed only for one month at a time.');
-    }
+    // if (start.getFullYear() !== end.getFullYear() || start.getMonth() !== end.getMonth()) {
+    //     throw new Error('Slot generation is allowed only for one month at a time.');
+    // }
 
     let current = new Date(start);
 
     while (current <= end) {
         const formattedDate = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}-${String(current.getDate()).padStart(2, '0')}`;
-        console.log(formattedDate,'formattedDate')
+        // console.log(formattedDate,'formattedDate')
         let startTime = convertTo24Hour(startingTime);
 
         for (let hour = 0; hour < workingHours; hour++) {
@@ -390,7 +383,7 @@ const updateslots = async (req, res) => {
   } else if (available === "booked") {
     available = "cancelled";
   } else {
-    available = "available";
+    available = "cancelled";
   }
 
   try {

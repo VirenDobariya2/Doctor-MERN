@@ -6,13 +6,11 @@ import "react-phone-input-2/lib/style.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
-import SlotList from "./slotList/SlotList";
-import moment from "moment";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import CustomTimePicker from "../components/CustomTimePicker/CustomTimePicker";
 import instance from "../axiosINstance/axiosInstance";
-import debounce from "lodash/debounce"; 
+import debounce from "lodash/debounce";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const Appointment = () => {
   const {
@@ -23,11 +21,11 @@ const Appointment = () => {
   } = useContext(AppContext);
 
   const navigate = useNavigate();
-  const dropREf = useRef(null);
+  // const dropREf = useRef(null);
 
   const [formData, setFormData] = useState({
     name: "",
-    date: "",
+    date: null,
     symptoms: "",
     doctor: selectedDoctor,
     department: selectedDepartment,
@@ -55,27 +53,32 @@ const Appointment = () => {
         const availableSlots = response.data.filter(
           (slot) => slot.status === "available"
         );
-        setState(prevState => ({
+        setState((prevState) => ({
           ...prevState,
           doctorSlots: availableSlots,
         }));
       } catch (error) {
         console.error("Error fetching slot list:", error.response ? error.response.data : error.message);
       }
-    },) 
+    }, 300)
   ).current;
 
   useEffect(() => {
     const getDoctorsAndDepartments = async () => {
       try {
-        const response = await instance({
-          url:"doctors/doctor-data/?data=approved",
-          method:"GET"
-        })
-        setState(prevState => ({
+        const token = localStorage.getItem("token");
+        const response = await axios.get(
+          "http://localhost:3000/api/doctors/doctor-data/?data=approved",
+          {
+            headers: {
+              authorization: token,
+            },
+          }
+        );
+        setState((prevState) => ({
           ...prevState,
           doctors: response.data,
-          departments: response.data,
+          departments: [...new Set(response.data.map((doc) => doc.doctorField))], 
         }));
       } catch (error) {
         toast.error("Failed to fetch doctors");
@@ -87,27 +90,26 @@ const Appointment = () => {
 
   useEffect(() => {
     if (!formData.department) return;
-    if (formData.doctor) {
-      debouncedFetchSlots(formData.doctor);
-    }
 
     const filteredDoctors = state.doctors.filter(
       (doc) => doc.doctorField === formData.department
     );
-    setState(prevState => ({
+    setState((prevState) => ({
       ...prevState,
       filteredDoctors,
       isDisabled: false,
     }));
-  }, [formData.department,formData.doctor]);
-
-  // useEffect(() => {
-  //   if (formData.doctor) {
-  //     debouncedFetchSlots(formData.doctor);
-  //   }
-  // }, [formData.doctor]);
+  }, [formData.department]);
 
   useEffect(() => {
+    if (formData.doctor) {
+      debouncedFetchSlots(formData.doctor);
+    }
+  }, [formData.doctor]);
+
+  useEffect(() => {
+    if (!formData.date || !formData.time) return;
+
     const isoString = moment(formData.date).format("YYYY-DD-MM");
     const timeFormat = moment(formData.time, "hh:mm a").format("hh:mm a");
     const selectedSlot = state.doctorSlots.find(
@@ -117,13 +119,13 @@ const Appointment = () => {
     );
 
     if (selectedSlot) {
-      setFormData(prevState => ({ ...prevState, slotId: selectedSlot._id }));
+      setFormData((prevState) => ({ ...prevState, slotId: selectedSlot._id }));
     }
   }, [formData.date, formData.time, state.doctorSlots]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prevState => ({
+    setFormData((prevState) => ({
       ...prevState,
       [name]: value,
     }));
@@ -131,7 +133,7 @@ const Appointment = () => {
 
   const handleSelectChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prevState => ({
+    setFormData((prevState) => ({
       ...prevState,
       [name]: value,
     }));
@@ -147,18 +149,18 @@ const Appointment = () => {
 
     if (!formData.slotId) return;
     try {
-      const response = await instance({
+      await instance({
         url: "appoinment/appoinments",
         method: "POST",
         data: formData,
       });
       setFormData({
         name: "",
-        date: "",
+        date: null,
         time: "",
         symptoms: "",
         doctor: selectedDoctor,
-        department: setSelectedDepartment,
+        department: selectedDepartment,
         gender: "",
         slotId: null,
       });
@@ -172,6 +174,7 @@ const Appointment = () => {
     }
   };
 
+
   const filterDates = (date) => {
     return state.doctorSlots.some((slot) =>
       moment(slot.date).isSame(date, "day")
@@ -179,14 +182,14 @@ const Appointment = () => {
   };
 
   const handleDateChange = (date) => {
-    setFormData(prevState => ({
+    setFormData((prevState) => ({
       ...prevState,
       date: date,
     }));
   };
 
   const handleTimeChange = (newTime) => {
-    setFormData(prevState => ({
+    setFormData((prevState) => ({
       ...prevState,
       time: newTime.trim(),
     }));
@@ -260,9 +263,9 @@ const Appointment = () => {
                     <option value="" disabled>
                       Select Department
                     </option>
-                    {state.departments.map((dept) => (
-                      <option key={dept._id} value={dept.doctorField}>
-                        {dept.doctorField}
+                    {state.departments.map((dept, index) => (
+                      <option key={index} value={dept}>
+                        {dept}
                       </option>
                     ))}
                   </select>
@@ -270,7 +273,7 @@ const Appointment = () => {
                 <div className="w-full mb-4">
                   <label className="block font-bold mb-2">Doctor *</label>
                   <select
-                    ref={dropREf}
+                    // ref={dropREf}
                     id="doctor"
                     name="doctor"
                     value={formData.doctor}
@@ -282,8 +285,8 @@ const Appointment = () => {
                     <option value="" disabled>
                       Select Doctor
                     </option>
-                    {state.filteredDoctors.map((doc) => (
-                      <option key={doc._id} value={doc._id}>
+                    {state.filteredDoctors.map((doc, index) => (
+                      <option key={index} value={doc._id}>
                         {doc.firstName}
                       </option>
                     ))}
@@ -293,7 +296,7 @@ const Appointment = () => {
 
               <div className="flex gap-2">
                 <div>
-                  <div className="w-48 mb-4 ">
+                  <div className="w-48 mb-4">
                     <label className="block font-bold mb-2">Select Date *</label>
                     <DatePicker
                       placeholderText="DD-MMM-YYYY"

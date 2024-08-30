@@ -3,20 +3,18 @@ import DepartmentCard from '../components/DepartmentCard';
 import axios from 'axios';
 import { AppContext } from './context/Context';
 
-
 const Department = () => {
-  const { setAllDoctors} = useContext(AppContext);
-
+  const { setAllData, allData } = useContext(AppContext);
   const [departments, setDepartments] = useState([]);
 
   useEffect(() => {
-    getDoctor()
+    getDoctor();
   }, []);
 
   const getDoctor = async () => {
     try {
       const token = localStorage.getItem("token");
-      const doctors = await axios.get(
+      const response = await axios.get(
         `http://localhost:3000/api/doctors/doctor-data/?data=approved`,
         {
           headers: {
@@ -24,19 +22,26 @@ const Department = () => {
           },
         }
       );
-      // console.log("doctor", doctors)
-      // setDoctors(doctors.data)
-      setDepartments(doctors.data);
-      setAllDoctors(doctors.data)
+      const doctors = response.data;
+
+      // Update allData in the context
+      setAllData({
+        departments: doctors,
+        doctors: doctors,
+      });
+
+      // Filter departments with status 'approved'
+      setDepartments(doctors.filter(department => department.status === 'approved'));
     } catch (error) {
-      toast.error("Failed to doctors");
+      toast.error("Failed to fetch doctors");
     }
   };
+
   return (
     <div className="p-4" id='userDepartment'>
       <h2 className="text-4xl text-center font-bold mb-8 mt-10 uppercase">Doctors</h2>
       <div className="flex flex-wrap justify-center gap-10">
-        {departments.filter(department => department.status === 'approved').map(department => (
+        {departments.map(department => (
           <DepartmentCard key={department._id} department={department} />
         ))}
       </div>

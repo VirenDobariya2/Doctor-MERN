@@ -134,7 +134,6 @@ const DoctorSlot = () => {
   };
 
   const eventStyleGetter = (event) => {
-    // let backgroundColor = event.availablity === "available" ? "blue" : "red" ;
     let backgroundColor = "";
 
     // Check the availability and set the background color

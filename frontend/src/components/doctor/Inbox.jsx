@@ -1,9 +1,10 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+
 
 const Inbox = () => {
   const [approvedAppointments, setApprovedAppointments] = useState(null);
-  // const [appointmentData, setAppointmentData] = useState(null);
   const [error, setError] = useState(null);
 
   const getApprovedAppointments = async () => {
@@ -14,8 +15,8 @@ const Inbox = () => {
         "http://localhost:3000/api/appoinment/approve",
         { headers: { authorization: token } }
       );
-      console.log(response.data);
       setApprovedAppointments(response.data);
+
     } catch (err) {
       setError(err.message);
     }
@@ -31,11 +32,10 @@ const Inbox = () => {
         }
       );
       getApprovedAppointments();
-      // setAppointmentData((prevData) =>
-      //   prevData.filter((appoinment) => appoinment._id !== id)
-      // );
+      toast.success("Appointment Done successfully!")
     } catch (err) {
       setError(err.message);
+      toast.err("Appointment not Done!")
     }
   };
 
@@ -90,6 +90,7 @@ const Inbox = () => {
             </div>
           ))}
       </div>
+      <ToastContainer/>
     </div>
   );
 };

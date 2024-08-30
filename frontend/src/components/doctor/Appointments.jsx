@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
 
 
 const Appointments = () => {
@@ -9,6 +10,7 @@ const Appointments = () => {
 
   const getUser = async () => {
     try {
+      // const response = await instance
       const token = localStorage.getItem("token");
       const response = await axios.get(
         "http://localhost:3000/api/appoinment/appoinment-data/?data=pending",
@@ -19,6 +21,7 @@ const Appointments = () => {
       // console.log("data", response.data)
     } catch (err) {
       setError(err.message);
+      
     }
   };
   
@@ -41,9 +44,10 @@ console.log(appointmentData)
       );
 
       getUser();
-      // toast.success("Appointment approved successfully!");
+      toast.success("Appointment approved successfully!");
     } catch (err) {
-      setError(err.message);
+      // setError(err.message);
+      toast.err("Appointment not approved!")
     }
   };
 
@@ -59,8 +63,10 @@ console.log(appointmentData)
       setAppointmentData((prevData) =>
         prevData.filter((appoinment) => appoinment._id !== id)
       );
+      toast.success("Appointment Delete successfully!");
     } catch (err) {
       setError(err.message);
+      toast.err("Appointment not Delete!");
     }
   };
 
@@ -77,7 +83,7 @@ console.log(appointmentData)
             <div
               key={appointment._id}
               className="border rounded-lg w-[450px] h-auto bg-blue-300 m-5 hover:-translate-y-2 duration-300"
-            >
+              >
               <div className="px-3 py-3 ">
                 <span className="m-5 font-bold">Name:</span>
                 <span className="font-bold m-14">{appointment.name}</span>
@@ -103,7 +109,7 @@ console.log(appointmentData)
               </div>
               <div className="px-3 py-3">
                 <span className="m-6 font-bold">Time:</span>
-                <span className="font-bold m-14">{appointment.slotId?.time  }</span>
+                <span className="font-bold m-14">{appointment.slotId?.time}</span>
               </div>
               
               <div className="flex justify-between">
@@ -123,6 +129,7 @@ console.log(appointmentData)
             </div>
           ))}
       </div>
+      <ToastContainer/>
     </div>
   );
 };

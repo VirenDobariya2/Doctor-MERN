@@ -135,6 +135,7 @@ const bookSlot = async (req, res) => {
     const doctorsSlots = await Slots.findByIdAndUpdate(
       slotId,
       { userId: userId, status: "booked" },
+      // {userId:userId, status:"cancelled"},
       { new: true }
     );
 
