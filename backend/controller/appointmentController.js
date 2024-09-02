@@ -2,12 +2,13 @@ const express = require("express");
 const Appoinment = require("../models/userAppoinmentModels");
 const authMiddleware = require("../middlewares/authMiddleware");
 const router = express.Router();
+const Notification =require("../models/notificationModel")
 const Doctor = require("../models/userDoctorModels");
 const Slots = require("../models/sloatsModel");
 const { default: mongoose } = require("mongoose");
 
 const appoinments = async (req, res) => {
-  // console.log("req", req.body);
+  console.log("req", req.body);
   const userId = req.userId;
 
   const {
@@ -80,14 +81,33 @@ const approve = async (req, res) => {
     const approvedAppointment = await Appoinment.findByIdAndUpdate(
       appid,
       { status: "approved" },
-      { new: true }
+      { new: true },
     ).populate('slotId');
-
     if (!approvedAppointment) {
       return res.status(404).send("Appointment not found");
     }
+    console.log('approvedAppointment',approvedAppointment)
+
+    await Notification.create({
+      userId: approvedAppointment.userId, 
+      message: `Appointment with ${approvedAppointment.name} has been approved.`,
+      appid:appid,
+      isRead: false,
+    });
+    console.log("fech",)
 
     res.json(approvedAppointment);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+};
+
+const getNotifications = async (req, res) => {
+  const { userId } = req.body; 
+  console.log("id",userId)
+  try {
+    const notifications = await Notification.find({ appid:appid }).sort({ createdAt: -1 });
+    res.json(notifications);
   } catch (error) {
     res.status(500).send(error);
   }
@@ -103,7 +123,6 @@ const approves = async (req, res) => {
 };
 
 const appoinment = async (req, res) => {
-  // console.log("Deleting appointment with ID", req.query.appid);
   try {
     await Appoinment.findByIdAndDelete(req.query.appid);
     res.status(204).send();
@@ -115,11 +134,8 @@ const appoinment = async (req, res) => {
 const getDoctorlots = async (req, res) => {
   try {
     const doctorID = req.params.id;
-
     const doctorObjectId = new mongoose.Types.ObjectId(doctorID);
-
     const doctorsSlots = await Slots.find({ doctorId: doctorObjectId });
-
     res.status(200).send(doctorsSlots);
   } catch (err) {
     return res.status(400).json({ message: "Error" });
@@ -151,4 +167,5 @@ module.exports = {
   appoinment,
   getDoctorlots,
   bookSlot,
+  getNotifications
 };

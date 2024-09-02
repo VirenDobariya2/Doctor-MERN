@@ -8,6 +8,11 @@ const appointmentSchema = new mongoose.Schema({
     ref: "Doctor",
     required: true,
   },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: false,
+  },
   slotId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Slots",
@@ -21,6 +26,7 @@ const appointmentSchema = new mongoose.Schema({
     enum: ["Pending", "Confirmed", "Cancel"],
     default: "Pending",
   },
+
 });
 
 const Appoinment = mongoose.model("Appoinment", appointmentSchema);

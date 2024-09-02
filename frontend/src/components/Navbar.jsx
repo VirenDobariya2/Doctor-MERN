@@ -2,13 +2,53 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { MdNotificationsNone } from "react-icons/md";
+import axios from "axios";
+
+const NotificationIcon = ({ notificationCount, notifications }) => {
+  const [isOpen, setIsOpen] = useState(false);
+ 
+  const handleIconClick = () => {
+    setIsOpen(!isOpen);
+  };
+
+  return (
+    <div className="relative flex items-center">
+      <div
+        className="border border-gray-600 p-2 rounded-lg relative cursor-pointer"
+        onClick={handleIconClick}
+      >
+        <MdNotificationsNone className="text-2xl text-center" />
+        {notificationCount > 0 && (
+          <span className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
+            {notificationCount}
+          </span>
+        )}
+      </div>
+      {isOpen && (
+        <div className="absolute top-0 right-0 mt-12 w-64 bg-white border border-gray-300 rounded-lg shadow-lg p-4">
+          {notifications.length > 0 ? (
+            notifications.map((notification) => (
+              <div key={notification._id} className="mb-2 p-2 border-b">
+                <p>{notification.message}</p>
+              </div>
+            ))
+          ) : (
+            <p>No notifications</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [notificationCount, setNotificationCount] = useState(1); 
   const navigate = useNavigate();
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [notifications, setNotifications] = useState([]);
+  const [notificationCount, setNotificationCount] = useState(0);
+
 
   const handleScroll = () => {
     if (window.scrollY < lastScrollY) {
@@ -18,6 +58,31 @@ const Navbar = () => {
     }
     setLastScrollY(window.scrollY);
   };
+
+  //Get your notification
+  useEffect(() => {
+    // Fetch notifications from your API
+    const fetchNotifications = async () => {
+      try {
+        const token = localStorage.getItem("token");
+       const response =   await axios.get(
+          "http://localhost:3000/api/appoinment/getNotifications",
+          {
+            headers: { authorization: token },
+          }
+        );
+        console.log("jjkgj",response.data)
+        setNotifications(response.data);
+        setNotificationCount(response.data.length);
+      } catch (error) {
+        console.error("Error fetching notifications", error);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
+
+
 
   useEffect(() => {
     const loggedIn = localStorage.getItem("isLoggedIn") === "true";
@@ -111,16 +176,7 @@ const Navbar = () => {
               LOGIN
             </button>
           )}
-          <div className="relative flex items-center">
-            <div className="border border-gray-600 p-2 rounded-lg relative cursor-pointer">
-              <MdNotificationsNone className="text-2xl text-center" />
-              {notificationCount > 0 && (
-                <span className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
-                  {notificationCount}
-                </span>
-              )}
-            </div>
-          </div>
+           <NotificationIcon notificationCount={notificationCount} notifications={notifications} />
         </div>
       </div>
     </nav>
