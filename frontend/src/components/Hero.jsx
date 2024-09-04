@@ -1,4 +1,4 @@
-
+// import animate from "../../public/assets/"
 import medical from "../../public/assets/medical.png";
 
 const Hero = () => {

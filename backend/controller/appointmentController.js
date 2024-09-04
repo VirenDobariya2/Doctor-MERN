@@ -8,8 +8,9 @@ const Slots = require("../models/sloatsModel");
 const { default: mongoose } = require("mongoose");
 
 const appoinments = async (req, res) => {
-  console.log("req", req.body);
+  // console.log("req", req.body);
   const userId = req.userId;
+  console.log('userId',userId,req.userId)
 
   const {
     name,
@@ -21,7 +22,7 @@ const appoinments = async (req, res) => {
 
   const doctorsSlots = await Slots.findByIdAndUpdate(
     slotId,
-    { userId: userId, status: "booked" },
+    { status: "booked" },
     { new: true }
   );
   const newAppointment = new Appoinment({
@@ -30,9 +31,11 @@ const appoinments = async (req, res) => {
     symptoms,
     doctor,
     gender,
+    userId
   });
 
   const savedAppointment = await newAppointment.save();
+  console.log('savedAppointment',savedAppointment,userId)
   res.status(200).json(savedAppointment);
 };
 
@@ -94,7 +97,7 @@ const approve = async (req, res) => {
       appid:appid,
       isRead: false,
     });
-    console.log("fech",)
+    // console.log("fech",approvedAppointment)
 
     res.json(approvedAppointment);
   } catch (error) {
@@ -103,15 +106,15 @@ const approve = async (req, res) => {
 };
 
 const getNotifications = async (req, res) => {
-  const { userId } = req.body; 
-  console.log("id",userId)
+  const { userId } = req; 
   try {
-    const notifications = await Notification.find({ appid:appid }).sort({ createdAt: -1 });
+    const notifications = await Notification.find({ userId }).sort({ createdAt: -1 });
     res.json(notifications);
   } catch (error) {
     res.status(500).send(error);
   }
 };
+
 
 const approves = async (req, res) => {
   try {

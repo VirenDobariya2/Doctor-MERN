@@ -7,8 +7,7 @@ export default {
   theme: {
     extend: {backgroundImage: {
       'doctor': "url('./public/assets/doctor-u.jpg')",
-      'appoinment' : "url('./assets/appoinment.png')",
-      
+      'appoinment' : "url('./assets/appoinment.png')",   
     },},
     keyframes: {
       'bounce-up-down': {

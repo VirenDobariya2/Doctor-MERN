@@ -6,7 +6,7 @@ const Doctor = require("../models/userDoctorModels");
 const { appoinments, appoinmentdata, approve, approves, appoinment,getDoctorlots,bookSlot, getNotifications } = require("../controller/appointmentController");
 // const mongoose = require("mongoose");
 
-router.post("/appoinments", appoinments);
+router.post("/appoinments",authMiddleware, appoinments);
 
 // Doctor appoinment Page in the data
 

@@ -44,6 +44,19 @@ const Appointment = () => {
     doctorSlots: [],
   });
 
+  useEffect(() => {
+    if (location.state) {
+      const { doctorId, doctorField } = location.state;
+      setFormData(prevState => ({
+        ...prevState,
+        department: doctorField,
+        doctor: doctorId,
+      }));
+      setSelectedDepartment(doctorField);
+      setSelectedDoctor(doctorId);
+    }
+  }, [location.state, setSelectedDepartment, setSelectedDoctor]);
+
   // Debounced function to fetch slots for a doctor
   const debouncedFetchSlots = useRef(
     debounce(async (doctorId) => {

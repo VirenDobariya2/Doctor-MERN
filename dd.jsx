@@ -1,366 +1,221 @@
-import { useContext, useState, useEffect, useRef } from "react";
-import appointmentImg from "../assets/appoinment.png";
-import { AppContext } from "./context/Context";
-import axios from "axios";
-import "react-phone-input-2/lib/style.css";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import CustomTimePicker from "../components/CustomTimePicker/CustomTimePicker";
-import instance from "../axiosINstance/axiosInstance";
-import debounce from "lodash/debounce";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import logo from "../assets/logo.png";
+import { MdNotificationsNone, MdCancel } from "react-icons/md";
+import axios from "axios";
 
-const Appointment = () => {
-  const {
-    selectedDepartment,
-    selectedDoctor,
-    setSelectedDepartment,
-    setSelectedDoctor,
-  } = useContext(AppContext);
-
+const Navbar = ({ updateNotificationCount }) => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
-  // const dropREf = useRef(null);
+  const [showNavbar, setShowNavbar] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [notifications, setNotifications] = useState([]);
+  const [notificationCount, setNotificationCount] = useState(0);
+  const [isOpen, setIsOpen] = useState(false);
+  const [currentNotifications, setCurrentNotifications] = useState([]);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    date: null,
-    symptoms: "",
-    doctor: selectedDoctor,
-    department: selectedDepartment,
-    gender: "",
-    time: "",
-    slotId: null,
-  });
+  const handleScroll = () => {
+    if (window.scrollY < lastScrollY) {
+      setShowNavbar(true);
+    } else {
+      setShowNavbar(false);
+    }
+    setLastScrollY(window.scrollY);
+  };
 
-  const [state, setState] = useState({
-    doctors: [],
-    filteredDoctors: [],
-    departments: [],
-    isDisabled: true,
-    doctorSlots: [],
-  });
-
-  // Debounced function to fetch slots for a doctor
-  const debouncedFetchSlots = useRef(
-    debounce(async (doctorId) => {
-      try {
-        const response = await instance({
-          url: `appoinment/docSlots/${doctorId}`,
-          method: "GET",
-        });
-        const availableSlots = response.data.filter(
-          (slot) => slot.status === "available"
-        );
-        setState((prevState) => ({
-          ...prevState,
-          doctorSlots: availableSlots,
-        }));
-      } catch (error) {
-        console.error("Error fetching slot list:", error.response ? error.response.data : error.message);
-      }
-    }, 300)
-  ).current;
-
+  // Fetch notifications
   useEffect(() => {
-    const getDoctorsAndDepartments = async () => {
+    const fetchNotifications = async () => {
       try {
         const token = localStorage.getItem("token");
         const response = await axios.get(
-          "http://localhost:3000/api/doctors/doctor-data/?data=approved",
+          "http://localhost:3000/api/appoinment/getNotifications",
           {
-            headers: {
-              authorization: token,
-            },
+            headers: { authorization: token },
           }
         );
-        setState((prevState) => ({
-          ...prevState,
-          doctors: response.data,
-          departments: [...new Set(response.data.map((doc) => doc.doctorField))], 
-        }));
+        setNotifications(response.data);
+        setNotificationCount(response.data.length);
+        setCurrentNotifications(response.data);  
       } catch (error) {
-        toast.error("Failed to fetch doctors");
+        console.error("Error fetching notifications", error);
       }
     };
 
-    getDoctorsAndDepartments();
+    fetchNotifications();
   }, []);
 
-  useEffect(() => {
-    if (!formData.department) return;
+  const handleIconClick = () => {
+    setIsOpen(!isOpen);
+  };
 
-    const filteredDoctors = state.doctors.filter(
-      (doc) => doc.doctorField === formData.department
-    );
-    setState((prevState) => ({
-      ...prevState,
-      filteredDoctors,
-      isDisabled: false,
+  const markAllAsRead = () => {
+    const updatedNotifications = currentNotifications.map((notification) => ({
+      ...notification,
+      isRead: true,
     }));
-  }, [formData.department]);
-
-  useEffect(() => {
-    if (formData.doctor) {
-      debouncedFetchSlots(formData.doctor);
-    }
-  }, [formData.doctor]);
-
-  useEffect(() => {
-    if (!formData.date || !formData.time) return;
-
-    const isoString = moment(formData.date).format("YYYY-DD-MM");
-    const timeFormat = moment(formData.time, "hh:mm a").format("hh:mm a");
-    const selectedSlot = state.doctorSlots.find(
-      (slot) =>
-        moment(slot.date).format("YYYY-DD-MM") === isoString &&
-        slot.time === timeFormat
-    );
-
-    if (selectedSlot) {
-      setFormData((prevState) => ({ ...prevState, slotId: selectedSlot._id }));
-    }
-  }, [formData.date, formData.time, state.doctorSlots]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
+    setCurrentNotifications(updatedNotifications);
+    setNotificationCount(0);
+    updateNotificationCount(0);
   };
 
-  const handleSelectChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
-    if (name === "doctor") {
-      setSelectedDoctor(value);
-    } else if (name === "department") {
-      setSelectedDepartment(value);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!formData.slotId) return;
-    try {
-      await instance({
-        url: "appoinment/appoinments",
-        method: "POST",
-        data: formData,
-      });
-      setFormData({
-        name: "",
-        date: null,
-        time: "",
-        symptoms: "",
-        doctor: selectedDoctor,
-        department: selectedDepartment,
-        gender: "",
-        slotId: null,
-      });
-
-      toast.success("Appointment created successfully");
-      setTimeout(() => {
-        navigate("/home");
-      }, 1000);
-    } catch (error) {
-      toast.error("Failed to create appointment");
-    }
-  };
-
-
-  const filterDates = (date) => {
-    return state.doctorSlots.some((slot) =>
-      moment(slot.date).isSame(date, "day")
-    );
-  };
-
-  const handleDateChange = (date) => {
-    setFormData((prevState) => ({
-      ...prevState,
-      date: date,
-    }));
-  };
-
-  const handleTimeChange = (newTime) => {
-    setFormData((prevState) => ({
-      ...prevState,
-      time: newTime.trim(),
-    }));
-  };
-
-  const filterAvailableTimes = () => {
-    if (!formData.doctor || !formData.date) return [];
-    return state.doctorSlots
-      .filter(
-        (slot) =>
-          slot.doctorId === formData.doctor &&
-          moment(slot.date).isSame(moment(formData.date), "day")
+  const handleNotificationClick = (id) => {
+    setCurrentNotifications((prev) =>
+      prev.map((notification) =>
+        notification._id === id ? { ...notification, isRead: true, } : notification
       )
-      .map((slot) => moment(slot.time, "h:mm a").format("h:mm a "));
+    );
+    // setCurrentNotifications(notification);
+    setNotificationCount(notificationCount - 1);
+    updateNotificationCount(notificationCount - 1);
+  };
+
+  const handleCancelClick = (id, e) => {
+    e.preventDefault();
+    setCurrentNotifications((prev) =>
+      prev.filter((notification) => notification._id !== id)
+    );
+    // setCurrentNotifications(updatedNotifications);
+    // setNotificationCount(notificationCount - 1);
+    updateNotificationCount(notificationCount - 1);
+  };
+
+  useEffect(() => {
+    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
+    setIsLoggedIn(loggedIn);
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [lastScrollY]);
+
+  const handleLogin = () => {
+    navigate("/");
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("role");
+    localStorage.removeItem("isLoggedIn");
+    localStorage.clear();
+    setIsLoggedIn(false);
+    navigate("/");
+  };
+
+  const handleScrollHome = () => {
+    const scrollto = document.getElementById("userHome");
+    scrollto.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleScrollDepartment = () => {
+    const scrollto = document.getElementById("userDepartment");
+    scrollto.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleScrollAbout = () => {
+    const scrollto = document.getElementById("userAbout");
+    scrollto.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleScrollService = () => {
+    const scrollto = document.getElementById("userService");
+    scrollto.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleScrollConnect = () => {
+    const scrollto = document.getElementById("userConnect");
+    scrollto.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleScrollAppoinment = () => {
+    navigate("/appoinment");
   };
 
   return (
-    <div className="container mx-auto bg-blue-100 bg-cover bg-fixed h-screen">
-      <div>
-        <h2 className="text-2xl text-center py-3 font-bold mb-8 uppercase text-black">
-          Appointment
-        </h2>
-      </div>
-      <div className="bg-gradient-to-r from-blue-400 box-content to-indigo-500 p-10 rounded-md">
-        <div className="gap-5 flex flex-col md:flex-row">
-          <div className="ml-14 md:w-1/2 p-10">
-            <img
-              src={appointmentImg}
-              alt="Appointment"
-              className="object-cover rounded-md"
-            />
-          </div>
-          <form onSubmit={handleSubmit}>
-            <div className="w-full">
-              <div className="w-full mb-4">
-                <label className="block font-bold mb-2">Patient Name *</label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="block w-96 rounded-md border border-slate-300 bg-white px-3 py-2 placeholder-slate-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-                  required
-                />
-              </div>
+    <nav
+      className={`p-3 sticky top-0 z-50 transition-transform duration-300 ${
+        showNavbar ? "bg-gray-200 translate-y-0" : "bg-gray-200 -translate-y-full"
+      }`}
+    >
+      <div className="container mx-auto flex justify-between items-center">
+        <div className="text-white text-lg font-bold">
+          <img src={logo} alt="Logo" className="h-12 w-28 inline-block mr-2" />
+        </div>
+        <div className="space-x-16">
+          <button onClick={handleScrollHome}>Home</button>
+          <button onClick={handleScrollDepartment}>Find a Doctor</button>
+          <button onClick={handleScrollAbout}>About Us</button>
+          <button onClick={handleScrollService}>Service</button>
+          <button onClick={handleScrollConnect}>Connect</button>
+        </div>
+        <div className="flex items-center space-x-7">
+          <button
+            className="bg-gray-500 py-2 px-7 rounded-lg hover:bg-blue-400 mr-5 font-bold transition duration-300"
+            onClick={handleScrollAppoinment}
+          >
+            <p className="text-white">Book Appointment</p>
+          </button>
+          {isLoggedIn ? (
+            <button
+              className="bg-gray-600 text-white px-7 py-2 rounded-lg hover:bg-blue-700 transition duration-300"
+              onClick={handleLogout}
+            >
+              LOGOUT
+            </button>
+          ) : (
+            <button
+              className="bg-gray-600 text-white px-7 py-2 rounded-lg hover:bg-blue-700 transition duration-300"
+              onClick={handleLogin}
+            >
+              LOGIN
+            </button>
+          )}
 
-              <div className="w-full mb-4">
-                <label className="block font-bold mb-2">Symptoms</label>
-                <input
-                  type="text"
-                  id="symptoms"
-                  name="symptoms"
-                  value={formData.symptoms}
-                  onChange={handleChange}
-                  className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 placeholder-slate-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-                />
-              </div>
-
-              <div className="flex gap-2">
-                <div className="w-full mb-4">
-                  <label className="block font-bold mb-2">Department *</label>
-                  <select
-                    id="department"
-                    name="department"
-                    value={formData.department}
-                    onChange={handleSelectChange}
-                    className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 placeholder-slate-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-                    required
-                  >
-                    <option value="" disabled>
-                      Select Department
-                    </option>
-                    {state.departments.map((dept, index) => (
-                      <option key={index} value={dept}>
-                        {dept}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="w-full mb-4">
-                  <label className="block font-bold mb-2">Doctor *</label>
-                  <select
-                    // ref={dropREf}
-                    id="doctor"
-                    name="doctor"
-                    value={formData.doctor}
-                    onChange={handleSelectChange}
-                    className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 placeholder-slate-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-                    required
-                    disabled={state.isDisabled}
-                  >
-                    <option value="" disabled>
-                      Select Doctor
-                    </option>
-                    {state.filteredDoctors.map((doc, index) => (
-                      <option key={index} value={doc._id}>
-                        {doc.firstName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <div>
-                  <div className="w-48 mb-4">
-                    <label className="block font-bold mb-2">Select Date *</label>
-                    <DatePicker
-                      placeholderText="DD-MMM-YYYY"
-                      value={formData.date}
-                      selected={formData.date ? new Date(formData.date) : null}
-                      onChange={handleDateChange}
-                      filterDate={filterDates}
-                      className="mb-4 z-50 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 placeholder-slate-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-                      required
-                      disabled={!formData.doctor}
-                    />
-                  </div>
-                </div>
-
-                <div className="w-full mb-4">
-                  <label className="block font-bold mb-2">Time *</label>
-                  <CustomTimePicker
-                    value={formData.time}
-                    onChange={handleTimeChange}
-                    availableTimes={filterAvailableTimes()}
-                  />
-                </div>
-              </div>
-
-              <div className="w-full mb-4">
-                <label className="block font-bold mb-2">Gender *</label>
-                <select
-                  id="gender"
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleChange}
-                  className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 placeholder-slate-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-                  required
-                >
-                  <option value="" disabled>
-                    Select Gender
-                  </option>
-                  <option>Male</option>
-                  <option>Female</option>
-                </select>
-              </div>
-
-              <div>
-                <button
-                  type="submit"
-                  className="border z-0 hover:scale-95 duration-300 relative group cursor-pointer text-gray-800 overflow-hidden h-16 w-64 rounded-md bg-blue-300 p-2 flex justify-center items-center font-extrabold"
-                >
-                  <div className="absolute right-2 -top-4 group-hover:top-1 group-hover:right-2 z-10 w-32 h-32 rounded-full group-hover:scale-150 duration-500 bg-sky-800"></div>
-                  <p className="z-40">Book Appointment</p>
-                </button>
-              </div>
-              <div>
-                Click Here ?
-                <a className="font-medium underline ml-1" href="/home">
-                  Home
-                </a>
-              </div>
+          {/* Notification Icon and Dropdown */}
+          <div className="relative flex items-center">
+            <div
+              className="border border-gray-600 p-2 rounded-lg relative cursor-pointer"
+              onClick={handleIconClick}
+            >
+              <MdNotificationsNone className="text-2xl text-center" />
+              {notificationCount > 0 && (
+                <span className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
+                  {notificationCount}
+                </span>
+              )}
             </div>
-          </form>
+            {isOpen && (
+              <div className="absolute top-0 right-0 mt-12 w-64 h-96 bg-white border border-gray-300 rounded-lg shadow-lg p-4 overflow-y-auto">
+                <button
+                  onClick={markAllAsRead}
+                  className="w-full text-sm text-blue-500 hover:text-blue-700 mb-2"
+                >
+                  Mark All as Read
+                </button>
+                {currentNotifications.length > 0 ? (
+                  currentNotifications.map((notification) => (
+                    <div
+                      key={notification._id}
+                      className={`mb-2 p-2 border-b cursor-pointer flex items-center justify-between ${notification.read ? "bg-white" : "bg-gray-100"}`}
+                      onClick={() => handleNotificationClick(notification._id)}
+                    >
+                      <p className="flex-1">{notification.message}</p>
+                      <MdCancel
+                        className="text-red-300 hover:text-red-600 cursor-pointer ml-2"
+                        onClick={(e) => handleCancelClick(notification._id, e)}
+                      />
+                    </div>
+                  ))
+                ) : (
+                  <p>No notifications</p>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
-      <ToastContainer />
-    </div>
+    </nav>
   );
 };
 
-export default Appointment;
+export default Navbar;
