@@ -71,7 +71,7 @@ const Login = () => {
         <img
           src={doctor}
           alt="Background"
-          className="w-full h-full object-cover absolute inset-0"
+          className="w-full h-full object-cover absolute inset-0xs"
         />
         <div className="absolute inset-0 bg-black opacity-50 backdrop-blur-md"></div>
       </div>
