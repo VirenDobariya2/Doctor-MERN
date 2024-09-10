@@ -39,7 +39,7 @@ const Department = () => {
 
   return (
     <div className="p-4" id='userDepartment'>
-      <h2 className="text-4xl text-center font-bold mb-8 mt-10 uppercase">Doctors</h2>
+      <h2 className="text-4xl text-center font-bold mb-6 uppercase">Doctors</h2>
       <div className="flex flex-wrap justify-center gap-10">
         {departments.map(department => (
           <DepartmentCard key={department._id} department={department} />
