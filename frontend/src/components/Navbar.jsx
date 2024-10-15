@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import logo from "F:/MERN STACK/Complete MERN/Doctor Appoinment/frontend/src/assets/logolo.png";
+import logo from "../assets/logolo.png";
 import { MdNotificationsNone, MdCancel } from "react-icons/md";
 import axios from "axios";
 
@@ -135,14 +135,14 @@ const Navbar = ({ updateNotificationCount }) => {
         showNavbar ? "bg-gray-50 translate-y-0" : "bg-gray-100 -translate-y-full"
       }`}
     >
-      <div className="container mx-auto flex items-center justify-between">
+      <div className="container flex items-center justify-between mx-auto">
         {/* Logo */}
         <div className="flex-shrink-0 ml-24">
           <img src={logo} alt="Logo" className="h-14" />
         </div>
         
         {/* Navigation Buttons */}
-        <div className="flex-grow flex justify-center space-x-10 ">
+        <div className="flex justify-center flex-grow space-x-10 ">
           <button onClick={handleScrollHome} className="hover:text-blue-400">Home</button>
           <button onClick={handleScrollDepartment}  className="hover:text-blue-400">Find a Doctor</button>
           <button onClick={handleScrollAbout} className="hover:text-blue-400">About Us</button>
@@ -151,23 +151,23 @@ const Navbar = ({ updateNotificationCount }) => {
         </div>
         
         {/* Action Buttons and Notifications */}
-        <div className="flex items-center space-x-4 mr-24">
+        <div className="flex items-center mr-24 space-x-4">
           <button
-            className="border-blue-300 border-2 hover:text-white py-2 px-3 rounded-lg hover:bg-blue-500 transition duration-300"
+            className="px-3 py-2 transition duration-300 border-2 border-blue-300 rounded-lg hover:text-white hover:bg-blue-500"
             onClick={handleScrollAppoinment}
           >
             <p className="">Book Appointment</p>
           </button>
           {isLoggedIn ? (
             <button
-              className="border-blue-300 border-2 hover:text-white  px-4 py-2 rounded-lg hover:bg-blue-500 transition duration-300"
+              className="px-4 py-2 transition duration-300 border-2 border-blue-300 rounded-lg hover:text-white hover:bg-blue-500"
               onClick={handleLogout}
             >
               LOGOUT
             </button>
           ) : (
             <button
-              className="bg-gray-600 text-white px-7 py-2 rounded-lg hover:bg-blue-700 transition duration-300"
+              className="py-2 text-white transition duration-300 bg-gray-600 rounded-lg px-7 hover:bg-blue-700"
               onClick={handleLogin}
             >
               LOGIN
@@ -176,21 +176,21 @@ const Navbar = ({ updateNotificationCount }) => {
           {/* Notification Icon and Dropdown */}
           <div className="relative flex items-center">
             <div
-              className="border border-gray-600 p-2 rounded-lg relative cursor-pointer"
+              className="relative p-2 border border-gray-600 rounded-lg cursor-pointer"
               onClick={handleIconClick}
             >
               <MdNotificationsNone className="text-2xl" />
               {notificationCount > 0 && (
-                <span className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
+                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
                   {notificationCount}
                 </span>
               )}
             </div>
             {isOpen && (
-              <div className="absolute top-full right-0 mt-2 w-64 bg-white border border-gray-300 rounded-lg shadow-lg p-4 overflow-y-auto max-h-80">
+              <div className="absolute right-0 w-64 p-4 mt-2 overflow-y-auto bg-white border border-gray-300 rounded-lg shadow-lg top-full max-h-80">
                 <button
                   onClick={markAllAsRead}
-                  className="w-full text-sm text-blue-500 hover:text-blue-700 mb-2"
+                  className="w-full mb-2 text-sm text-blue-500 hover:text-blue-700"
                 >
                   Mark All as Read
                 </button>
@@ -203,7 +203,7 @@ const Navbar = ({ updateNotificationCount }) => {
                     >
                       <p className="flex-1">{notification.message}</p>
                       <MdCancel
-                        className="text-red-300 hover:text-red-600 cursor-pointer ml-2"
+                        className="ml-2 text-red-300 cursor-pointer hover:text-red-600"
                         onClick={(e) => handleCancelClick(notification._id, e)}
                       />
                     </div>

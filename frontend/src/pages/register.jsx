@@ -4,7 +4,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import doctor from "../../public/assets/doctor-u.jpg";
-import sideimg from "F:/MERN STACK/Complete MERN/Doctor Appoinment/frontend/src/assets/ragisterside.png";
+import sideimg from "../assets/ragisterside.png";
 
 
 const Register = () => {
@@ -57,12 +57,12 @@ const Register = () => {
 
   return (
     <>
-      <div className="relative h-screen flex items-center justify-center">
+      <div className="relative flex items-center justify-center h-screen">
         <div className="absolute inset-0">
           <img
             src={doctor}
             alt="Background"
-            className="w-full h-full object-cover absolute inset-0"
+            className="absolute inset-0 object-cover w-full h-full"
           />
           <div className="absolute inset-0 bg-black opacity-50 backdrop-blur-md"></div>
         </div>
@@ -77,7 +77,7 @@ const Register = () => {
           </div>
           <div className="w-1/2 flex rounded-l-[60px] items-center justify-center relative overflow-hidden z-10 bg-gray-200 p-8 rounded-lg shadow-md before:w-24 before:h-24 before:absolute before:bg-purple-600 before:rounded-full before:-z-10 before:blur-2xl after:w-32 after:h-32 after:absolute after:bg-sky-400 after:rounded-full after:-z-10 after:blur-2xl after:top-24 after:-right-12">
             <form onSubmit={handleSubmit} className="w-full max-w-md">
-              <h2 className="text-2xl font-bold  text-center uppercase">
+              <h2 className="text-2xl font-bold text-center uppercase">
                 Register
               </h2>
               <div className="mb-4">
@@ -85,7 +85,7 @@ const Register = () => {
                   Role
                 </label>
                 <div className="flex items-center">
-                  <label className="block text-md font-medium text-gray-500 mr-4">
+                  <label className="block mr-4 font-medium text-gray-500 text-md">
                     <input
                       type="radio"
                       name="role"
@@ -96,7 +96,7 @@ const Register = () => {
                     />
                     Doctor
                   </label>
-                  <label className="block text-md font-medium text-gray-500">
+                  <label className="block font-medium text-gray-500 text-md">
                     <input
                       type="radio"
                       name="role"
@@ -119,7 +119,7 @@ const Register = () => {
                     type="text"
                     value={formData.firstName}
                     onChange={handleChange}
-                    className="mt-1 p-2 w-full bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    className="w-full p-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
                     placeholder="First Name"
                   />
                   <input
@@ -127,7 +127,7 @@ const Register = () => {
                     type="text"
                     value={formData.lastName}
                     onChange={handleChange}
-                    className="mt-1 p-2 w-full bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    className="w-full p-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
                     placeholder="Last Name"
                   />
                 </div>
@@ -141,7 +141,7 @@ const Register = () => {
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="mt-1 p-2 w-full bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  className="w-full p-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
                   placeholder="Email"
                 />
               </div>
@@ -157,7 +157,7 @@ const Register = () => {
                         type="text"
                         value={formData.doctorField}
                         onChange={handleChange}
-                        className="mt-1 p-2 w-full bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                        className="w-full p-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
                         placeholder="Field"
                       />
                     </div>
@@ -170,7 +170,7 @@ const Register = () => {
                         type="text"
                         value={formData.doctorExperience}
                         onChange={handleChange}
-                        className="mt-1 p-2 w-full bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                        className="w-full p-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
                         placeholder="Experience"
                       />
                     </div>
@@ -186,7 +186,7 @@ const Register = () => {
                   type="number"
                   value={formData.number}
                   onChange={handleChange}
-                  className="mt-1 p-2 w-full bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  className="w-full p-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
                   placeholder="Number"
                 />
               </div>
@@ -228,17 +228,17 @@ const Register = () => {
                   type="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="mt-1 p-2 w-full bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  className="w-full p-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
                   placeholder="Password"
                 />
               </div>
               <button
-                className="bg-gradient-to-r from-purple-600 via-purple-400 to-blue-500 px-4 py-2 font-bold text-white rounded-md hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-blue-600 w-full"
+                className="w-full px-4 py-2 font-bold text-white rounded-md bg-gradient-to-r from-purple-600 via-purple-400 to-blue-500 hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-blue-600"
                 type="submit"
               >
                 Register
               </button>
-              <div className="mt-3 px-8 py-4 bg-blue-200 dark:bg-zinc-800 text-center text-sm text-blue-900 dark:text-blue-300">
+              <div className="px-8 py-4 mt-3 text-sm text-center text-blue-900 bg-blue-200 dark:bg-zinc-800 dark:text-blue-300">
                 <span className="text-sm">
                   Already have an account?
                   <a className="font-medium underline" href="/">
