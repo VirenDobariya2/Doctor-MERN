@@ -31,7 +31,7 @@ const Home = () => {
   return (
     <>
 
-    <Navbar />
+      <Navbar />
       <Hero/>  
       <Department/>
       <About/>

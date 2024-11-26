@@ -26,7 +26,7 @@ const Connect = () => {
             </div>
           </div>
 
-          <div className="">
+          <div className="mr-10">
             <img src={connectimg} alt="logo" className="w-[250px] h-auto" />
           </div>
         </div>
