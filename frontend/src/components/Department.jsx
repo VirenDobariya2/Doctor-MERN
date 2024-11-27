@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import DepartmentCard from '../components/DepartmentCard';
-import axios from 'axios';
+import instance from "../axiosINstance/axiosInstance";
 import { AppContext } from './context/Context';
 
 const Department = () => {
@@ -14,12 +14,9 @@ const Department = () => {
   const getDoctor = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get(
-        `http://localhost:3000/api/doctors/doctor-data/?data=approved`,
-        {
-          headers: {
-            authorization: token,
-          },
+      const response = await instance({
+        url: "doctors/doctor-data/?data=approved",
+        method: "GET",
         }
       );
       const doctors = response.data;

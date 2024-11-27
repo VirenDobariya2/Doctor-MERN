@@ -1,5 +1,8 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import instance from "../axiosINstance/axiosInstance";
+
+
 
 const DoctorData = () => {
   const [approvedDoctor, setApprovedDoctor] = useState();
@@ -9,9 +12,10 @@ const DoctorData = () => {
     try {
       const token = localStorage.getItem("token");
 
-      const response = await axios.get(
-        "http://localhost:3000/api/doctors/approve-doctor",
-        { headers: { authorization: token } }
+      const response = await instance({
+        url:  "doctors/approve-doctor",
+        method: "GET",
+      }
       );
       setApprovedDoctor(response.data);
     } catch (err) {
@@ -22,11 +26,10 @@ const DoctorData = () => {
   const handleDeleteDoctor = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(
-        `http://localhost:3000/api/doctors/doctor-remove?docid=${id}`,
-        {
-          headers: { authorization: token },
-        }
+      await instance({
+        url:    `doctors/doctor-remove?docid=${id}`,
+        method: "DELETE",
+      }
       );
       getApprovedDoctor();
       

@@ -1,6 +1,8 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { FaUpload, FaRegEdit, FaSave } from "react-icons/fa";
+import instance from "../../axiosINstance/axiosInstance";
+
 
 const Profile = () => {
   const [doctordata, setDoctorData] = useState(null);
@@ -14,9 +16,10 @@ const Profile = () => {
   const getUser = async () => {
     const token = localStorage.getItem("token");
     try {
-      const response = await axios.get(
-        "http://localhost:3000/api/users/get-user-info-by-id",
-        { headers: { authorization: token } }
+      const response = await instance({
+        url: "users/get-user-info-by-id",
+        method: "GET",
+      }
       );
       const userData = response.data.data;
       setDoctorData(userData);
@@ -39,11 +42,14 @@ const Profile = () => {
     formData.append("profilePic", profilePic);
 
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/doctors/upload-profile-pic",
-        formData,
-        { headers: { authorization: token } }
-      );
+      const response = await instance({
+        url: "doctors/upload-profile-pic",
+        method: "POST",
+        data: formData,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       const userData = response.data.data;
       setDoctorData(userData);
       setPreview(null)
@@ -65,10 +71,12 @@ const Profile = () => {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await axios.put(
-        "http://localhost:3000/api/doctors/update-user-info",
-        editData,
-        { headers: { authorization: token } }
+      const response = await instance(
+        {
+          url: "doctors/update-user-info",
+          method: "PUT",
+          data: editData
+        }
       );
       setDoctorData(response.data.data);
       setIsDataEditMode(false);

@@ -1,6 +1,8 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
+import instance from "../../axiosINstance/axiosInstance";
+
 
 
 const Inbox = () => {
@@ -11,9 +13,11 @@ const Inbox = () => {
     try {
       const token = localStorage.getItem("token");
 
-      const response = await axios.get(
-        "http://localhost:3000/api/appoinment/approve",
-        { headers: { authorization: token } }
+      const response = await instance(
+        {
+          url: "appoinment/approve",
+          method: "GET",
+        }
       );
       setApprovedAppointments(response.data);
 
@@ -25,10 +29,10 @@ const Inbox = () => {
   const handleDelete = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(
-        `http://localhost:3000/api/appoinment/appoinment?appid=${id}`,
+      await instance(
         {
-          headers: { authorization: token },
+          url: `appoinment/appoinment?appid=${id}`,
+          method: "DELETE",
         }
       );
       getApprovedAppointments();

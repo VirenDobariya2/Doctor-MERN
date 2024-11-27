@@ -7,6 +7,8 @@ import Navbar from "../components/Navbar"
 import Connect from "../components/Connect"
 import About from "../components/About"
 import Service from "../components/Service"
+import instance from "../axiosINstance/axiosInstance";
+
 
 
 const Home = () => {
@@ -17,8 +19,11 @@ const Home = () => {
     try {
       const token = localStorage.getItem("token");
 
-      const response = await axios.post("http://localhost:3000/api/user/get-info-by-id",{},
-        { headers: { authorization: token } }
+      const response = await instance(
+        {
+          url: "user/get-info-by-id",
+          method: "POST",
+        }
       )
       console.log(response.data)
     } catch (error) {

@@ -42,12 +42,10 @@ const DoctorSlot = () => {
 
   const Slots = async () => {
     const token = localStorage.getItem("token");
-    const response = await axios.get(
-      "http://localhost:3000/api/doctors/slots",
-      {
-        headers: { authorization: token },
-      }
-    );
+    const response = await instance({
+      url: "doctors/slots",
+      method: "GET",
+    });
     const now = moment();
     const futureSlots = response.data.filter(
       (slot) =>
@@ -96,18 +94,16 @@ const DoctorSlot = () => {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await axios.patch(
-        `http://localhost:3000/api/doctors/updateslots`,
-
-        {
+      const response = await instance({
+        url: "doctors/updateslots",
+        method: "PATCH",
+        data: {
           slotId: modalData.slotId,
           available: modalData.status,
           date: modalData.date,
           time: modalData.time,
         },
-        // { slotId: modalData.slotId, available: modalData.status },
-        { headers: { authorization: token } }
-      );
+      });
       const filterSlots = slots.filter((sl) => sl._id != response.data._id);
       Slots();
       onCloseModal();
@@ -198,7 +194,9 @@ const DoctorSlot = () => {
           <input
             type="date"
             value={startDate}
-            onChange={(e) => {setStartDate(e.target.value),console.log("ddd",e.target.value)}}
+            onChange={(e) => {
+              setStartDate(e.target.value), console.log("ddd", e.target.value);
+            }}
             className="w-full p-2 border rounded"
           />
         </div>
@@ -207,7 +205,9 @@ const DoctorSlot = () => {
           <input
             type="date"
             value={endDate}
-            onChange={(e) => {setEndDate(e.target.value),console.log("gg",e.target.value)}}
+            onChange={(e) => {
+              setEndDate(e.target.value), console.log("gg", e.target.value);
+            }}
             className="w-full p-2 border rounded"
           />
         </div>

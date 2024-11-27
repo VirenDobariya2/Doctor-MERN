@@ -2,6 +2,8 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import instance from "../axiosINstance/axiosInstance";
+
 
 const AdminHome = () => {
   const [doctorsData, setDoctorsData] = useState([]);
@@ -11,13 +13,11 @@ const AdminHome = () => {
     const token = localStorage.getItem("token");
    
     try {
-      const doctors = await axios.get(
-        `http://localhost:3000/api/doctors/doctor-data/?data=pending`,
-        {
-          headers: {
-            authorization: token,
-          },
-        }
+      const doctors = await instance ({
+        url:"doctors/doctor-data/?data=pending",
+        method: "GET",
+      }
+        
       ); 
       setDoctorsData(doctors.data);
     } catch (error) {
@@ -28,15 +28,13 @@ const AdminHome = () => {
   const handleapproveDoctor = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.patch(
-        "http://localhost:3000/api/doctors/approve-doctor",
-        { docid: id },        
-        {
-          headers: {
-            authorization: token,
-          }, 
+      await instance({
+        url: "doctors/approve-doctor",
+        method: "PATCH",
+        data: {
+          docid: id,
         },
-       
+      }
       );
       toast.success("Doctor approved successfully");
       getDoctor();
@@ -48,10 +46,10 @@ const AdminHome = () => {
   const handleDeleteDoctor = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(
-        `http://localhost:3000/api/doctors/doctor-remove?docid=${id}`,
+      await instance(
         {
-          headers: { authorization: token },
+          url:  `doctors/doctor-remove?docid=${id}`,
+          method: "DELETE",
         }
       );
       setDoctorsData((prevData) =>

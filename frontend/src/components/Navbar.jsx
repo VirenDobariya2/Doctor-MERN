@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/logolo.png";
 import { MdNotificationsNone, MdCancel } from "react-icons/md";
-import axios from "axios";
+import instance from "../axiosINstance/axiosInstance";
+
 
 const Navbar = ({ updateNotificationCount }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -28,15 +29,13 @@ const Navbar = ({ updateNotificationCount }) => {
     const fetchNotifications = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get(
-          "http://localhost:3000/api/appoinment/getNotifications",
-          {
-            headers: { authorization: token },
-          }
-        );
+        const response = await instance({
+          url: "appoinment/getNotifications",
+          method: "GET",
+        });
         setNotifications(response.data);
         setNotificationCount(response.data.length);
-        setCurrentNotifications(response.data);  
+        setCurrentNotifications(response.data);
       } catch (error) {
         console.error("Error fetching notifications", error);
       }
@@ -62,7 +61,9 @@ const Navbar = ({ updateNotificationCount }) => {
   const handleNotificationClick = (id) => {
     setCurrentNotifications((prev) =>
       prev.map((notification) =>
-        notification._id === id ? { ...notification, isRead: true } : notification
+        notification._id === id
+          ? { ...notification, isRead: true }
+          : notification
       )
     );
     setNotificationCount(notificationCount - 1);
@@ -132,7 +133,9 @@ const Navbar = ({ updateNotificationCount }) => {
   return (
     <nav
       className={`p-3 sticky top-0 z-50 transition-transform duration-300 ${
-        showNavbar ? "bg-gray-50 translate-y-0" : "bg-gray-100 -translate-y-full"
+        showNavbar
+          ? "bg-gray-50 translate-y-0"
+          : "bg-gray-100 -translate-y-full"
       }`}
     >
       <div className="container flex items-center justify-between mx-auto">
@@ -140,16 +143,29 @@ const Navbar = ({ updateNotificationCount }) => {
         <div className="flex-shrink-0 ml-24">
           <img src={logo} alt="Logo" className="h-14" />
         </div>
-        
+
         {/* Navigation Buttons */}
         <div className="flex justify-center flex-grow space-x-10 ">
-          <button onClick={handleScrollHome} className="hover:text-blue-400">Home</button>
-          <button onClick={handleScrollDepartment}  className="hover:text-blue-400">Find a Doctor</button>
-          <button onClick={handleScrollAbout} className="hover:text-blue-400">About Us</button>
-          <button onClick={handleScrollService} className="hover:text-blue-400">Service</button>
-          <button onClick={handleScrollConnect} className="hover:text-blue-400">Connect</button>
+          <button onClick={handleScrollHome} className="hover:text-blue-400">
+            Home
+          </button>
+          <button
+            onClick={handleScrollDepartment}
+            className="hover:text-blue-400"
+          >
+            Find a Doctor
+          </button>
+          <button onClick={handleScrollAbout} className="hover:text-blue-400">
+            About Us
+          </button>
+          <button onClick={handleScrollService} className="hover:text-blue-400">
+            Service
+          </button>
+          <button onClick={handleScrollConnect} className="hover:text-blue-400">
+            Connect
+          </button>
         </div>
-        
+
         {/* Action Buttons and Notifications */}
         <div className="flex items-center mr-24 space-x-4">
           <button

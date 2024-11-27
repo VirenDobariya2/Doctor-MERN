@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
+import instance from "../../axiosINstance/axiosInstance";
 
 const Appointments = () => {
   const [appointmentData, setAppointmentData] = useState(null);
@@ -10,10 +11,10 @@ const Appointments = () => {
     try {
       // const response = await instance
       const token = localStorage.getItem("token");
-      const response = await axios.get(
-        "http://localhost:3000/api/appoinment/appoinment-data/?data=pending",
-        { headers: { authorization: token } }
-      );
+      const response = await instance({
+        url: "appoinment/appoinment-data/?data=pending",
+        method: "GET",
+      });
       setAppointmentData(response.data);
     } catch (err) {
       setError(err.message);
@@ -23,35 +24,34 @@ const Appointments = () => {
   const handleApprove = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      const updatedAppointment = await axios.patch(
-        `http://localhost:3000/api/appoinment/approve`,
-        { appid: id },
-        { headers: { authorization: token } }
-      );
-  
+      const updatedAppointment = await instance({
+        url: "appoinment/approve",
+        method: "PATCH",
+        data: {
+          appid: id,
+        },
+      });
+
       setAppointmentData((prevData) =>
         prevData.map((appointment) =>
           appointment._id === id ? updatedAppointment.data : appointment
         )
       );
-      
+
       getUser();
       toast.success("Appointment approved successfully!");
     } catch (err) {
       toast.error("Appointment not approved!");
     }
   };
-  
 
   const handleDelete = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(
-        `http://localhost:3000/api/appoinment/appoinment?appid=${id}`,
-        {
-          headers: { authorization: token },
-        }
-      );
+      await instance({
+        url: `appoinment/appoinment?appid=${id}`,
+        method: "DELETE",
+      });
       setAppointmentData((prevData) =>
         prevData.filter((appoinment) => appoinment._id !== id)
       );
