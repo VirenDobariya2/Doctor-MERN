@@ -110,7 +110,7 @@ const Profile = () => {
                     className="w-32 h-32 rounded-full object-cover"
                   />):
                   (<img
-                  src={`http://localhost:3000${doctordata.profilePic}`}
+                  src={`https://localhost:3000${doctordata.profilePic}`}
                   alt="Profile"
                   className="w-32 h-32 rounded-full object-cover"
                 />)

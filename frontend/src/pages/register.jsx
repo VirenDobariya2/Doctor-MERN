@@ -33,7 +33,7 @@ const Register = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .post("http://localhost:3000/api/users/register", formData)
+      .post("httpsS://localhost:3000/api/users/register", formData)
       .then((result) => {
         toast.success(result.data.message || "Registration Successful");
         setFormData({

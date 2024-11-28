@@ -17,7 +17,7 @@ const DepartmentCard = ({ department }) => {
   return (
     <div className="w-80 max-w-xs md:max-w-sm lg:max-w-md bg-white shadow-lg rounded-lg overflow-hidden m-7">
       <img
-        src={`http://localhost:3000${department.profilePic}`}
+        src={`https://localhost:3000${department.profilePic}`}
         alt={department.firstName}
         className="w-full h-36 object-cover md:h-48 lg:h-64"
       />
